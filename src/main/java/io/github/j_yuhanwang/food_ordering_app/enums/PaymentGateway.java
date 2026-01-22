@@ -8,6 +8,6 @@ public enum PaymentGateway {
     STRIPE,
     PAYPAL,
     REVOLUT,
-    SEPA,
-    ADYEN
+    APPLE_PAY,
+    GOOGLE_PAY
 }
