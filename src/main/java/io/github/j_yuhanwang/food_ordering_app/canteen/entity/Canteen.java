@@ -1,8 +1,4 @@
-package io.github.j_yuhanwang.food_ordering_app.canteen.entity;/*
- * @author BlairWang
- * @Date 24/01/2026 7:39 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.canteen.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
@@ -13,6 +9,18 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * Represents UCD Canteen.
+ * <p>
+ * This entity acts as the aggregate root for all food-related operations.
+ * It manages its own lifecycle along with its Menus and Operating Schedules(daily and holiday schedules).
+ * If a Canteen is deleted, all associated Menus and Schedules are strictly deleted.
+ *
+ * @author BlairWang
+ * @version 1.0
+ * @date 24/01/2026 7:39 pm
+ */
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,7 +33,11 @@ public class Canteen {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false,unique = true)
+    /**
+     * The unique name of the canteen (e.g., "Main Restaurant", "Pi Restaurant").
+     * Must be unique across the system to avoid confusion.
+     */
+    @Column(nullable = false, unique = true)
     @NotBlank(message = "Canteen name is required")
     private String name;
 
@@ -34,29 +46,42 @@ public class Canteen {
     @Column(length = 500)
     private String description;
 
-    //canteen is tightly coupled with the menu
-    // if a canteen is deleted, the menu data associated with that canteen will also be deleted
+    /**
+     * The list of menus offered by this canteen.
+     * <p>
+     * <b>Orphan Removal:</b> true (Removing a menu from this list deletes it from the database)
+     */
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @Builder.Default
     @ToString.Exclude
     private List<Menu> menus = new ArrayList<>();
 
+    /**
+     * The specific user account designated as the manager of this canteen.
+     * This user has permissions to update menus and schedules.
+     */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id", referencedColumnName = "id", unique = true)
     @JsonIgnore
     @ToString.Exclude
     private User manager;
 
-    @Builder.Default
-    private boolean isDeleted = false;
+//    @Builder.Default
+//    private boolean isDeleted=false;
 
-    //canteen is tightly coupled with the canteenSchedules
+    /**
+     * Standard weekly operating schedules (e.g., Mon-Fri 9am-5pm).
+     */
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @Builder.Default //Without this annotation, Lombok will neglect the initialized value
     @ToString.Exclude
     private List<CanteenSchedule> canteenSchedules = new ArrayList<>();
 
-    @OneToMany(mappedBy = "canteen",cascade = CascadeType.ALL)
+    /**
+     * Special schedules for specific dates (e.g., Bank Holidays, Christmas),
+     * which override the standard weekly schedule.
+     */
+    @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @Builder.Default
     @ToString.Exclude
     private List<HolidaySchedule> holidaySchedules = new ArrayList<>();
