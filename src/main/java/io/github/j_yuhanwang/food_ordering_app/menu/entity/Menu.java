@@ -13,7 +13,6 @@ import java.util.List;
 
 /**
  * Represents a specific food item or dish available for purchase.
- * <p>
  * A Menu item belongs to a specific {@link Canteen}. It includes pricing details,
  * availability windows (e.g., Breakfast only), and links to customer reviews.
  *
@@ -22,7 +21,12 @@ import java.util.List;
  * @date 24/01/2026 9:57 pm
  */
 
-@Table(name="menus")
+@Table(name = "menus",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"canteen_id", "name"}
+                )
+        })
 @Builder
 @Data
 @AllArgsConstructor
@@ -41,7 +45,7 @@ public class Menu {
 
     private String description;
 
-    @Column(nullable = false,precision = 10,scale=2)
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
     private String imageUrl;
@@ -51,7 +55,7 @@ public class Menu {
      * Relationship: Many Menu items belong to One Canteen.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="canteen_id", nullable = false)
+    @JoinColumn(name = "canteen_id", nullable = false)
     @ToString.Exclude
     private Canteen canteen;
 
@@ -59,7 +63,7 @@ public class Menu {
      * Historical record of orders containing this item.
      * Used for sales analysis or popularity ranking.
      */
-    @OneToMany(mappedBy = "menu",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
@@ -67,7 +71,7 @@ public class Menu {
     /**
      * Customer reviews specific to this dish.
      */
-    @OneToMany(mappedBy = "menu",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
@@ -104,8 +108,8 @@ public class Menu {
      * @return true if current time is within the start/end window, or if no window is defined.
      */
     @Transient
-    public boolean isAvailableNow(){
-        if(availableStartTime==null || availableEndTime==null){
+    public boolean isAvailableNow() {
+        if (availableStartTime == null || availableEndTime == null) {
             return true;
         }
         LocalTime now = LocalTime.now();
