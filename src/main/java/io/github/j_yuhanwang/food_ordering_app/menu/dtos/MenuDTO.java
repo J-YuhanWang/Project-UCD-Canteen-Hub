@@ -3,6 +3,7 @@ package io.github.j_yuhanwang.food_ordering_app.menu.dtos;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -10,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -61,5 +63,12 @@ public class MenuDTO {
 
     // Redundant name to avoid extra API calls for UI display.
     private String canteenName;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private MultipartFile imageFile;
+
+    private Double averageRating;
+
+    private Integer reviewCount;
 
 }
