@@ -54,7 +54,6 @@ public class Review {
 
     /**
      * The text content of the review.
-     * <p>
      * Defines column as TEXT to support long feedback (up to 64KB in typical DBs),
      * avoiding the 255-character limit of standard VARCHAR.
      */
@@ -67,8 +66,7 @@ public class Review {
 
     /**
      * The ID of the order associated with this review.
-     * <p>
-     * <b>Verification Logic:</b>
+     * Verification Logic:
      * Storing `orderId` allows the system to verify that "Verified Purchase" condition:
      * A user can only leave a review if they have actually purchased this item.
      */
