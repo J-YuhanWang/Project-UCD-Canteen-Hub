@@ -14,8 +14,7 @@ import java.time.LocalDateTime;
 
 /**
  * Represents a financial transaction record in the system.
- * <p>
- * This entity links a specific {@link Order} with a payment attempt.
+ * This entity links a specific Order with a payment attempt.
  * It tracks the status of the payment (COMPLETED, FAILED) and stores
  * external references (Transaction ID) from gateways like Stripe or PayPal.
  *
@@ -38,10 +37,8 @@ public class Payment {
 
     /**
      * The order associated with this payment.
-     * <p>
-     * <b>Relationship:</b> One-to-One.
-     * <br>
-     * <b>Owner Side:</b> Payment owns the foreign key (order_id).
+     * Relationship: One-to-One.
+     * Owner Side: Payment owns the foreign key (order_id).
      * This implies an Order can exist without a Payment (temporarily),
      * but a Payment must belong to an Order.
      */
@@ -83,23 +80,18 @@ public class Payment {
     // -----------------------------------------------------------------
 
     /**
-     * <b>Creation Time (Payment Intent):</b>
+     * Creation Time (Payment Intent):
      * The timestamp when the user clicked "Pay" and the payment record was initialized (status: PENDING).
-     * <p>
      * Used for timeout logic: If the payment is not completed within X minutes of creation,
      * the system can automatically cancel the associated order.
      */
-    //Creating a payment order and successfully deducting payment are two separate points in time.
-    //If a user places an order but doesn't pay, the timeout period (e.g., 15 minutes) can be calculated
-    // based on `createdAt`, and the order can be automatically cancelled.
     @CreatedDate
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
     /**
-     * <b>Confirmation Time (Money Moved):</b>
+     * Confirmation Time (Money Moved):
      * The timestamp when the payment was successfully processed and confirmed by the gateway.
-     * <p>
      * This is the authoritative date used for financial reporting and accounting.
      * It remains null until the status becomes COMPLETED.
      */
