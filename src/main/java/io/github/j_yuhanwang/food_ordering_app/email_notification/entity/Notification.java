@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 
 /**
  * Represents a log of a notification (email, SMS, etc.) sent by the system.
- * <p>
  * This entity is primarily used for audit trails, debugging delivery issues,
  * and maintaining a history of communication with users.
  *
@@ -45,7 +44,6 @@ public class Notification {
 
     /**
      * The main content of the notification.
-     * <p>
      * Annotated with {@code @Lob} (Large Object) to support storing large HTML templates
      * or extensive text that exceeds standard database column limits.
      */
