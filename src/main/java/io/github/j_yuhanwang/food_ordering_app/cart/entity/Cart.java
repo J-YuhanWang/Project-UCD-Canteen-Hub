@@ -31,10 +31,8 @@ public class Cart {
 
     /**
      * The user who owns this cart.
-     * <p>
-     * <b>Relationship:</b> One-to-One.
-     * <br>
-     * <b>Constraint:</b> A user can only have one active cart at a time (unique = true).
+     * Relationship: One-to-One.
+     * Constraint:A user can only have one active cart at a time (unique = true).
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)//Foreign key name
@@ -43,10 +41,8 @@ public class Cart {
 
     /**
      * The list of items currently selected by the user.
-     * <p>
-     * <b>CascadeType.ALL:</b> Saving the Cart automatically saves all added items.
-     * <br>
-     * <b>orphanRemoval = true:</b> If an item is removed from this list (e.g., user deletes an item),
+     * CascadeType.ALL:Saving the Cart automatically saves all added items.
+     * orphanRemoval = true: If an item is removed from this list (e.g., user deletes an item),
      * it is strictly deleted from the database.
      */
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
