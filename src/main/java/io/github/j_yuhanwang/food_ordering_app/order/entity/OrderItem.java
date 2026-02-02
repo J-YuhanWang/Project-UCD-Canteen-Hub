@@ -55,7 +55,7 @@ public class OrderItem {
     private int quantity;
 
     /**
-     * <b>Price Snapshot:</b> The price of a single unit at the time of order placement.
+     * Price Snapshot: The price of a single unit at the time of order placement.
      * This decouples the order history from future menu price changes.
      */
     @Column(nullable = false, precision = 10, scale = 2)
@@ -67,4 +67,15 @@ public class OrderItem {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal subtotal;
 
+    /**
+     * Snapshot of the menu name at the time of purchase.
+     * Prevents order history from changing if the menu item is renamed later.
+     */
+    @Column(nullable = false)
+    private String menuName;
+
+    /**
+     * Snapshot of the menu image URL at the time of purchase.
+     */
+    private String menuImageUrl;
 }

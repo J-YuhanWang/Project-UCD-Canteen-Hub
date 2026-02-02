@@ -1,6 +1,7 @@
 package io.github.j_yuhanwang.food_ordering_app.order.entity;
 
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
+import io.github.j_yuhanwang.food_ordering_app.canteen.entity.Canteen;
 import io.github.j_yuhanwang.food_ordering_app.enums.OrderStatus;
 import io.github.j_yuhanwang.food_ordering_app.enums.PaymentStatus;
 import io.github.j_yuhanwang.food_ordering_app.payment.entity.Payment;
@@ -85,13 +86,21 @@ public class Order {
 
     /**
      * The specific list of dishes included in this order.
-     * <p>
-     * <b>orphanRemoval = true:</b> Essential for data integrity. If an item is removed
+     * orphanRemoval = true: Essential for data integrity. If an item is removed
      * from this list programmatically, it is strictly deleted from the database.
      */
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @ToString.Exclude
     private List<OrderItem> orderItems = new ArrayList<>();
+
+    /**
+     * The canteen where this order was placed.
+     * Essential for routing the order to the correct kitchen and for financial separation.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="canteen_id", nullable = false)
+    @ToString.Exclude
+    private Canteen canteen;
 
 }
