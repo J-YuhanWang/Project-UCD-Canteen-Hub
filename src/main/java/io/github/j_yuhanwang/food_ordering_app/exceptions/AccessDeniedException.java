@@ -9,14 +9,15 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author YuhanWang
  * @Date 15/02/2026 2:44 pm
  */
-@ResponseStatus(value= HttpStatus.UNAUTHORIZED)//401:Not logged in/Invalid token
-public class UnauthorizedAccessException extends RuntimeException{
+
+@ResponseStatus(value= HttpStatus.FORBIDDEN) //403: Insufficient authorization
+public class AccessDeniedException extends RuntimeException{
 
     /**
      * Pass the custom message to the parent RuntimeException constructor.
      * @param message Detailed error information.
      */
-    public UnauthorizedAccessException(String message){
+    public AccessDeniedException(String message){
         super(message);
     }
 }
