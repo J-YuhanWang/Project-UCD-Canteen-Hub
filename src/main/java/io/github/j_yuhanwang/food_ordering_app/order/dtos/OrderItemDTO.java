@@ -1,33 +1,34 @@
-package io.github.j_yuhanwang.food_ordering_app.order.dtos;/*
- * @author BlairWang
- * @Date 18/12/2025 3:51 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.order.dtos;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.j_yuhanwang.food_ordering_app.menu.dtos.MenuDTO;
-import io.github.j_yuhanwang.food_ordering_app.menu.entity.Menu;
-import io.github.j_yuhanwang.food_ordering_app.order.entity.Order;
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+/**
+ * @author YuhanWang
+ * @Date 02/02/2026 5:57 pm
+ */
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderItemDTO {
-
     private Long id;
 
-    private MenuDTO menu;
-
+    //Flattened Menu Info
     private Long menuId;
+    private String menuName;
+    private String menuImageUrl;
 
-    private int quantity;
-
+    //Match Entity Naming
     private BigDecimal pricePerUnit;
-
+    private Integer quantity;
     private BigDecimal subtotal;
 }

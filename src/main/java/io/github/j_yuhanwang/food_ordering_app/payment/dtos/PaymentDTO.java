@@ -1,46 +1,66 @@
-package io.github.j_yuhanwang.food_ordering_app.payment.dtos;/*
- * @author BlairWang
- * @Date 18/12/2025 5:18 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.payment.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.j_yuhanwang.food_ordering_app.auth_users.dtos.UserDTO;
-import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
 import io.github.j_yuhanwang.food_ordering_app.enums.PaymentGateway;
 import io.github.j_yuhanwang.food_ordering_app.enums.PaymentStatus;
-import io.github.j_yuhanwang.food_ordering_app.order.dtos.OrderDTO;
-import io.github.j_yuhanwang.food_ordering_app.order.entity.Order;
-import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * * Data Transfer Object representing a financial transaction.
+ * * This class flattens complex relationships (User, Order, Canteen) to provide
+ * a lightweight "receipt" view for the frontend.
+ *
+ * @author YuhanWang
+ * @Date 02/02/2026 7:37 pm
+ */
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentDTO {
-
     private Long id;
 
+    //flattened structure of reference
+    private Long userId;
+    private String userName;
     private Long orderId;
+
+    /**
+     * Contextual information from the Order's Canteen.
+     * Helps users identify the payment source (e.g., "Main Restaurant").
+     */
+    private String canteenName;
 
     private BigDecimal amount;
 
     private PaymentStatus paymentStatus;
 
+    //Helper field for UI. True if status is COMPLETED.
+    private boolean isSuccess;
+
+    //Gateway Details
     private String transactionId;
-
     private PaymentGateway paymentGateway;
-
     private String failureReasons;
 
-    private boolean success;
-
+    //The actual time when money was successfully moved.
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime paymentDate;
 
-    private UserDTO user;//The user who made the payment
-    private OrderDTO order;
+    //The time when the payment intent was first created.
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdTime;
+
+
+
 }

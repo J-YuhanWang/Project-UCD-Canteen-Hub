@@ -1,36 +1,53 @@
-package io.github.j_yuhanwang.food_ordering_app.cart.entity;/*
- * @author BlairWang
- * @Date 16/12/2025 8:03 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.cart.entity;
 
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
+import java.util.ArrayList;
 import java.util.List;
 
-//Due to it is the entity, it will connect to the database
-@Data
-@Entity
-@Table(name="carts")
+/**
+ * Represents a user's active shopping basket.
+ * <p>
+ * A Cart acts as a temporary holding area for {@link CartItem}s before they are
+ * converted into an Order. Each user has exactly one active cart.
+ *
+ * @author BlairWang
+ * @version 1.0
+ * @date 24/01/2026 7:26 pm
+ */
+
 @Builder
-@AllArgsConstructor
+@Entity
 @NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "carts")
+@Data
 public class Cart {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "user_id")
+    /**
+     * The user who owns this cart.
+     * Relationship: One-to-One.
+     * Constraint:A user can only have one active cart at a time (unique = true).
+     */
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)//Foreign key name
+    @ToString.Exclude
     private User user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL,orphanRemoval = true)
-    private List<CartItem> cartItems;
-
-    private String promoCode;
+    /**
+     * The list of items currently selected by the user.
+     * CascadeType.ALL:Saving the Cart automatically saves all added items.
+     * orphanRemoval = true: If an item is removed from this list (e.g., user deletes an item),
+     * it is strictly deleted from the database.
+     */
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @ToString.Exclude
+    List<CartItem> cartItems = new ArrayList<>();
 }
+

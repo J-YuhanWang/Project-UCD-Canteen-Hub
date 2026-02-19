@@ -1,13 +1,16 @@
-package io.github.j_yuhanwang.food_ordering_app.exceptions;/*
- * @author BlairWang
- * @Date 22/12/2025 3:29 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.exceptions;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Custom exception to indicate that a requested resource was not found.
  * Inherits from RuntimeException to avoid mandatory try-catch blocks (Unchecked Exception).
+ * @author YuhanWang
+ * @Date 15/02/2026 2:44 pm
  */
+
+@ResponseStatus(value= HttpStatus.BAD_GATEWAY) //502
 public class PaymentProcessingException extends RuntimeException{
 
     /**

@@ -4,7 +4,6 @@ package io.github.j_yuhanwang.food_ordering_app.security;/*
  * @Version 1.0
  */
 
-import io.github.j_yuhanwang.food_ordering_app.exceptions.CustomAuthenticationEntryPoint;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

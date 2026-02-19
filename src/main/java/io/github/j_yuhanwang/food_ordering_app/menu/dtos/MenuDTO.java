@@ -1,46 +1,74 @@
-package io.github.j_yuhanwang.food_ordering_app.menu.dtos;/*
- * @author BlairWang
- * @Date 18/12/2025 2:39 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.menu.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.j_yuhanwang.food_ordering_app.category.entity.Category;
-import io.github.j_yuhanwang.food_ordering_app.review.dtos.ReviewDTO;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalTime;
+
+/**
+ * @author YuhanWang
+ * @Date 02/02/2026 4:28 pm
+ */
 
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MenuDTO {
-
     private Long id;
 
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = "Dish name is required")
     private String name;
 
     private String description;
 
-    @NotBlank(message = "Price is required")
-    @Positive(message = "Price must be positive")
+    /**
+     * Use BigDecimal for money to avoid precision loss.
+     * @Positive ensures price is greater than 0.
+     */
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be greater than 0")
     private BigDecimal price;
 
     private String imageUrl;
 
-    @NotBlank(message = "Category ID is required")
-    private Long categoryId;
+    private String foodCategory; //"Drinks","Mains"
 
+    //Availability Logic
+    private boolean isAvailable;
+
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime availableStartTime;
+
+    @JsonFormat(pattern = "HH:mm")
+    private LocalTime availableEndTime;
+
+    //Key Relationships
+    // Reference ID for database relationships and routing.
+    @NotNull(message = "Canteen id is required")
+    private Long canteenId;
+
+    // Redundant name to avoid extra API calls for UI display.
+    private String canteenName;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private MultipartFile imageFile;
 
-    private List<ReviewDTO> reviews;
+    private Double averageRating;
+
+    private Integer reviewCount;
+
 }

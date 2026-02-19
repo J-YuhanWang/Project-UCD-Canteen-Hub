@@ -1,101 +1,115 @@
-package io.github.j_yuhanwang.food_ordering_app.exceptions;/*
- * @author BlairWang
- * @Date 22/12/2025 4:29 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.exceptions;
 
 import io.github.j_yuhanwang.food_ordering_app.response.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 
-@ControllerAdvice
+/**
+ * Global Exception Handler.
+ * Acts as the centralized crisis management center to transform exceptions into standardized JSON responses.
+ * @author YuhanWang
+ * @Date 04/02/2026 10:14 pm
+ */
+@RestControllerAdvice //Intercept global exceptions
 public class GlobalExceptionHandler {
-
     /**
-     * Handle all uncaught exceptions.
+     * Helper method to build a consistent ResponseEntity.
+     * Maps the internal business response to the external HTTP protocol.
+     * * @param status The HTTP status to return (e.g., 404 NOT_FOUND)
+     * @param message The error message to display to the user
+     * @return A wrapped ResponseEntity containing the standard Response object
      */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Response<?>> handlerAllUnknownException(Exception ex){
-
-        // 1. Create a custom response body with a 500 status code and the error message.
-        // 创建自定义响应体，包含 500 状态码和错误消息。
+    private ResponseEntity<Response<?>> buildErrorResponse(HttpStatus status, String message){
         Response<?> response = Response.builder()
-                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message(ex.getMessage())
+                .statusCode(status.value()) //404
+                .message(message)
+                .timestamp(LocalDateTime.now())
                 .build();
-
-        // 2. Wrap the response body in a ResponseEntity with an actual HTTP 500 status.
-        // 将响应体封装在具有实际 HTTP 500 状态的 ResponseEntity 中。
-        return new ResponseEntity<>(response,HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(response,status);
     }
 
-    /**
-     * Handle not found exceptions.
-     */
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<Response<?>> handlerNotFoundException(NotFoundException ex){
-
-        // 1. Create a custom response body with a NOT_FOUND status code and the error message.
-        Response<?> response = Response.builder()
-                .statusCode(HttpStatus.NOT_FOUND.value())  //404 error
-                .message(ex.getMessage())
-                .build();
-
-        // 2. Wrap the response body in a ResponseEntity with an actual HTTP NOT_FOUND status.
-        return new ResponseEntity<>(response,HttpStatus.NOT_FOUND);
-    }
+    // =========================================================================
+    // CLIENT ERRORS (4xx) - Issues caused by user input or authentication
+    // =========================================================================
 
     /**
-     * Handle bad request exceptions.
+     * Handle 400 Bad Request: Triggered when client input logic fails validation.
      */
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Response<?>> handlerBadRequestException(BadRequestException ex){
-
-        // 1. Create a custom response body with a BAD_REQUEST status code and the error message.
-        Response<?> response = Response.builder()
-                .statusCode(HttpStatus.BAD_REQUEST.value()) //400 error
-                .message(ex.getMessage())
-                .build();
-
-        // 2. Wrap the response body in a ResponseEntity with an actual HTTP BAD_REQUEST status.
-        return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Response<?>> handlerBadRequest(BadRequestException ex){
+        return buildErrorResponse(HttpStatus.BAD_REQUEST,ex.getMessage());
     }
 
     /**
-     * Handle payment processing exceptions.
+     * Handle 401 Unauthorized: Triggered when the user is not logged in or the token is invalid.
+     */
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<Response<?>> handlerUnauthorizedAccess(UnauthorizedAccessException ex){
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED,ex.getMessage());
+    }
+
+    /**
+     * Handle 403 Forbidden: Triggered when a logged-in user lacks the required permissions.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Response<?>> handlerAccessDenied(AccessDeniedException ex){
+        return buildErrorResponse(HttpStatus.FORBIDDEN,ex.getMessage());
+    }
+
+    /**
+     * Handle 404 Not Found: Triggered when a requested resource (User, Menu, Order) does not exist.
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Response<?>> handleResourceNotFound(ResourceNotFoundException ex){
+        return buildErrorResponse(HttpStatus.NOT_FOUND,ex.getMessage());
+    }
+
+    /**
+     * Handle 409 Conflict: Triggered when a resource already exists (e.g., duplicate email during registration).
+     */
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<Response<?>> handlerUserAlreadyExists(UserAlreadyExistsException ex){
+        return buildErrorResponse(HttpStatus.CONFLICT,ex.getMessage());
+    }
+
+    // =========================================================================
+    // SERVER & EXTERNAL ERRORS (5xx) - Issues with third-party services or system failures
+    // =========================================================================
+
+    /**
+     * Handle 502 Bad Gateway: Specific to issues with the external payment provider (e.g., Stripe).
      */
     @ExceptionHandler(PaymentProcessingException.class)
-    public ResponseEntity<Response<?>> handlerPaymentProcessingException(PaymentProcessingException ex){
-        Response<?> response = Response.builder()
-                .statusCode(HttpStatus.BAD_GATEWAY.value()) //502 error
-                .message(ex.getMessage())
-                .build();
-
-        return new ResponseEntity<>(response,HttpStatus.BAD_GATEWAY);
+    public ResponseEntity<Response<?>> handlerPaymentProcessing(PaymentProcessingException ex){
+        return buildErrorResponse(HttpStatus.BAD_GATEWAY,ex.getMessage());
     }
 
-
-    @ExceptionHandler(UnauthorizedAccessException.class)
-    public ResponseEntity<Response<?>> handlerUnauthorizedAccessException(UnauthorizedAccessException ex){
-        Response<?> response = Response.builder()
-                .statusCode(HttpStatus.UNAUTHORIZED.value()) //401 error
-                .message(ex.getMessage())
-                .build();
-
-        return new ResponseEntity<>(response,HttpStatus.UNAUTHORIZED);
+    /**
+     * Handle 503 Service Unavailable: Used when the external Email service is unreachable.
+     */
+    @ExceptionHandler(EmailDeliveryException.class)
+    public ResponseEntity<Response<?>> handlerEmailDeliveryError(EmailDeliveryException ex){
+        return buildErrorResponse(HttpStatus.SERVICE_UNAVAILABLE,"Email service busy: " + ex.getMessage());
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Response<?>> handlerIllegalArgumentException(IllegalArgumentException ex){
-        Response<?> response = Response.builder()
-                .statusCode(HttpStatus.BAD_REQUEST.value()) //400 error
-                .message(ex.getMessage())
-                .build();
+    /**
+     * Handle 500 Internal Server Error: Specifically for file storage failures (e.g., AWS S3).
+     */
+    @ExceptionHandler(FileStorageException.class)
+    public ResponseEntity<Response<?>> handlerFileStorageError(FileStorageException ex){
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "File upload failed: " + ex.getMessage());
+    }
 
-        return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+    /**
+     * Global Fallback Handler: Catches all unhandled exceptions to prevent leaking sensitive system details.
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Response<?>> handleGlobalException(Exception ex){
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
     }
 
 }

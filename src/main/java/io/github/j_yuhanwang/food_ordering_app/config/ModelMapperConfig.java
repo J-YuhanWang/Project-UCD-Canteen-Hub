@@ -34,10 +34,10 @@ public class ModelMapperConfig {
                 // 开启字段匹配功能
                 .setFieldMatchingEnabled(true)
 
-                // Use Standard matching strategy (flexible mapping for similar field names)
-                // 设置标准匹配策略，名字相似即可自动转换
-                .setMatchingStrategy(MatchingStrategies.STANDARD);
+                // Use Strict matching strategy (flexible mapping for similar field names)
+                .setMatchingStrategy(MatchingStrategies.STRICT);
 
         return modelMapper;
+
     }
 }

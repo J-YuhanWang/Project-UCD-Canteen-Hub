@@ -1,44 +1,58 @@
-package io.github.j_yuhanwang.food_ordering_app.review.dtos;/*
- * @author BlairWang
- * @Date 18/12/2025 6:27 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.review.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
-import io.github.j_yuhanwang.food_ordering_app.menu.entity.Menu;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for Customer Reviews.
+ * Handles both input (creating a review) and output (displaying reviews).
+ *
+ * @author YuhanWang
+ * @Date 02/02/2026 7:58 pm
+ */
+
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ReviewDTO {
     private Long id;
 
-    private Long menuId;
+    //User Info
+    private Long userId;
+    private String userName;
+    private String userAvatarUrl;
 
-    private Long orderId;
+
+    //Flatted Menu Info
+    private Long menuId;
+    private String menuName;
+    private String menuImageUrl;
 
     @NotNull(message = "Rating is required")
-    @Min(1)
-    @Max(10)
-    private Integer rating;//e.g..1 to 10 stars
+    @Min(value = 1, message = "Rating must be at least 1")
+    @Max(value = 5, message = "Rating cannot exceed 5")
+    private Integer rating;
 
-    @Size(max = 500, message = "Comment cannot exceed 500 characters")
+    @NotBlank(message = "Comment cannot be empty")
     private String comment;
 
-    private String menuName;
+    //Verification
+    private Long orderId;
 
-    private LocalDateTime createdAt;
-
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createAt;
 }

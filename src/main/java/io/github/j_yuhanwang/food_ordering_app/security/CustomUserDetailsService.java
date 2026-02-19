@@ -6,7 +6,7 @@ package io.github.j_yuhanwang.food_ordering_app.security;/*
 
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.repository.UserRepository;
-import io.github.j_yuhanwang.food_ordering_app.exceptions.NotFoundException;
+import io.github.j_yuhanwang.food_ordering_app.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,7 +35,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // 1. Fetch user from DB, throw custom exception if not found
         User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User","email",username));
 
         // 2. Wrap the User entity into AuthUser (UserDetails) for Spring Security
         return AuthUser.builder()

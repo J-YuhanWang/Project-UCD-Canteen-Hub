@@ -1,21 +1,29 @@
-package io.github.j_yuhanwang.food_ordering_app.auth_users.dtos;/*
- * @author BlairWang
- * @Date 16/12/2025 2:48 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.auth_users.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+/**
+ * @author YuhanWang
+ * @Date 02/02/2026 11:28 am
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class LoginRequest {
-//    NotNull can only detect the value of null,
-//    NotBlank can retrieve the empty space,  "" and null.
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "password is required")
     private String password;
 }

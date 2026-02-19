@@ -1,74 +1,125 @@
-package io.github.j_yuhanwang.food_ordering_app.auth_users.entity;/*
- * @author BlairWang
- * @Date 14/12/2025 6:50 pm
- * @Version 1.0
- */
+package io.github.j_yuhanwang.food_ordering_app.auth_users.entity;
 
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.j_yuhanwang.food_ordering_app.cart.entity.Cart;
+import io.github.j_yuhanwang.food_ordering_app.enums.UserStatus;
 import io.github.j_yuhanwang.food_ordering_app.order.entity.Order;
 import io.github.j_yuhanwang.food_ordering_app.payment.entity.Payment;
+import io.github.j_yuhanwang.food_ordering_app.review.entity.Review;
 import io.github.j_yuhanwang.food_ordering_app.role.entity.Role;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-
-@Entity //JPA需要，告诉hibernate此类是需要持久化到数据库的entity
-@AllArgsConstructor //有参构造
-@NoArgsConstructor //无参构造
-@Data //@ToString,@EqualsAndHashCode,@Getter,@Setter <= toString(),equals(),hash(),getXx(),setXx()
-@Builder //建造者模式，replace the new method to create the instances
-@Table(name = "users") //Java对象会跟数据库的哪张表做映射；
+/**
+ *
+ * Represents a registered user in the system.
+ * This entity serves as the central point for user-related data including
+ * authentication credentials, orders, reviews, and payment history.
+ * @author BlairWang
+ * @Date 22/01/2026 8:14 pm
+ * @Version 1.0
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name="users")
+@Builder
+@EntityListeners(AuditingEntityListener.class)
 public class User {
-    @Id //JPA通过这个Annotation来识别entity的primary key
-
-    //放在 @Id 字段的下方，作为主键生成方式的补充说明。告诉 JPA 不要让 Java 代码来设置主键，而是由数据库来负责生成。
-    //对应SQL中的auto_increment
-    @GeneratedValue(strategy = GenerationType.IDENTITY)//可以规定id的生成策略
-    //@Column(name="id")表的字段名和Java中属性名一致的话，此行不用写
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)//auto-increment
     private Long id;
 
     private String name;
 
-    @Column(unique = true)
+    // Ensures email is unique in the database and follows a valid email format
+    @Column(unique = true,nullable = false)
+    @Email(message = "Invalid email format")
     private String email;
 
+    // @JsonIgnore prevents the password from being exposed in API responses (Security best practice)
+    @Column(nullable = false)
     @NotBlank(message="password is required")
+    @JsonIgnore
     private String password;
-
-    private String phoneNumber;
 
     private String profileUrl;
 
+    private String phoneNumber;
+
     private String address;
 
-    private boolean isActive;
+    // Defaults to 'ACTIVE' status upon creation unless specified otherwise
+    @Enumerated(EnumType.STRING)
+    private UserStatus userStatus;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(name="user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private List<Role> roles;
-
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-    private List<Order> orders;
-
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
-    private List<Payment> payments;
-
-    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL)
-    private Cart cart;
-
+    // Auditing Fields
+    // Automatically populated when the entity is persisted
+    @CreatedDate
+    @Column(updatable = false,nullable = false)
     private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt;
+    // Automatically updated whenever the entity is modified
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updateAt;
+
+    /**
+     * Many-to-Many relationship with Role.
+     * Defined as EAGER fetch to ensure roles are available during security authorization context loading.
+     */
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name="user_role",
+            joinColumns = @JoinColumn(name="user_id"), //user as a FK in the intermediate table
+            inverseJoinColumns =@JoinColumn(name="role_id")
+    )
+    @Builder.Default
+    @ToString.Exclude
+    private List<Role> roles = new ArrayList<>();
+
+    /**
+     * One-to-Many relationship with Order.
+     * 'orphanRemoval = true' ensures that if an Order is removed from this list,
+     * it is strictly deleted from the database to maintain data integrity.
+     */
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
+    @Builder.Default
+    @ToString.Exclude
+    private List<Order> orders = new ArrayList<>();
+
+    /**
+     * One-to-Many relationship with Review.
+     * Cascades all operations and removes orphaned reviews if disassociated from the user.
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
+    @Builder.Default
+    @ToString.Exclude
+    private List<Review> reviews = new ArrayList<>();
+
+    /**
+     * One-to-One relationship with Cart.
+     * A user has exactly one active shopping cart.
+     */
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ToString.Exclude
+    private Cart cart;
+
+    /**
+     * One-to-Many relationship with Payment.
+     * Tracks the complete payment history of the user.
+     */
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,orphanRemoval = true)
+    @Builder.Default
+    @ToString.Exclude
+    private List<Payment> payments = new ArrayList<>();
 
 }
