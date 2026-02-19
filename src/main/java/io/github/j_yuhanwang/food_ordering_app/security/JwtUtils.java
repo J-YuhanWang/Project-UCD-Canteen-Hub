@@ -7,6 +7,7 @@ package io.github.j_yuhanwang.food_ordering_app.security;/*
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +28,7 @@ public class JwtUtils {
     @Value("${secretJwtString}")
     private String secretJwtString;
 
+    @PostConstruct
     private void init(){
         byte[] keyByte = secretJwtString.getBytes(StandardCharsets.UTF_8);
         this.key = new SecretKeySpec(keyByte,"HmacSHA256");

@@ -5,6 +5,7 @@ package io.github.j_yuhanwang.food_ordering_app.security;/*
  */
 
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
+import io.github.j_yuhanwang.food_ordering_app.enums.UserStatus;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,7 +13,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-
+import java.util.Collections;
 
 
 /**
@@ -34,18 +35,13 @@ public class AuthUser implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-//        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-//        for(Role role: user.getRoles()){
-//            authorities.add(new SimpleGrantedAuthority(role.getName()));
-//        }
-//        return authorities;
-
-        return user.getRoles()
-                .stream()
+        if(user.getRoles()==null){
+            return Collections.emptyList();
+        }
+        return user.getRoles().stream()
                 // Map each business role to a SimpleGrantedAuthority that the framework understands
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .toList();
-
     }
 
     /**
@@ -70,6 +66,6 @@ public class AuthUser implements UserDetails {
      */
     @Override
     public boolean isEnabled() {
-        return user.isActive();
+        return user.getUserStatus() == UserStatus.ACTIVE;
     }
 }

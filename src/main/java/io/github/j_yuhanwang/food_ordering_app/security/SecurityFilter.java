@@ -4,8 +4,6 @@ package io.github.j_yuhanwang.food_ordering_app.security;/*
  * @Version 1.0
  */
 
-import io.github.j_yuhanwang.food_ordering_app.exceptions.CustomAccessDenialHandler;
-import io.github.j_yuhanwang.food_ordering_app.exceptions.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,9 +25,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityFilter {
-    private AuthFilter authFilter;
-    private CustomAccessDenialHandler customAccessDenialHandler;
-    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final AuthFilter authFilter;
+    private final CustomAccessDenialHandler customAccessDenialHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
