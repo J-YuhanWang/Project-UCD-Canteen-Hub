@@ -48,11 +48,11 @@ public class Response<T> {
                 .build();
     }
 
-    //3.success response: only convey the message
-    public static <T> Response<T> ok(String message){
+    //3.success response: no arguments
+    public static <T> Response<T> ok(){
         return Response.<T>builder()
                 .statusCode(200)
-                .message(message)
+                .message("Success")
                 .timestamp(LocalDateTime.now())
                 .build();
     }
