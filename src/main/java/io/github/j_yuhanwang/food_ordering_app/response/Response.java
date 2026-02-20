@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
-@Builder //不与数据库直接联系，所以JPA不管，由Lombok接管此类，省略构造方法
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,6 +25,54 @@ public class Response<T> {
     private String message; // Additional information about the response
     private T data; // The actual data payload
     private Map<String, Object> meta;
-    @JsonFormat(pattern = "yyyy-MM-dd HH：mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
+
+    //1.success response: only have the data
+    public static <T> Response<T> ok(T data){
+        return Response.<T>builder()
+                .statusCode(200)
+                .message("Success")
+                .data(data)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    //2.success response: convey the data and the message
+    public static <T> Response<T> ok(T data, String message){
+        return Response.<T>builder()
+                .statusCode(200)
+                .message(message)
+                .data(data)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    //3.success response: only convey the message
+    public static <T> Response<T> ok(String message){
+        return Response.<T>builder()
+                .statusCode(200)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    //4.error response: standard exception(statusCode+message)
+    public static <T> Response<T> error(int statusCode, String message){
+        return Response.<T>builder()
+                .statusCode(statusCode)
+                .message(message)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
+
+    //5.error response: exception with the error fields(statusCode+message+metadata)
+    public static <T> Response<T> error(int statusCode, String message, Map<String,Object> meta){
+        return Response.<T>builder()
+                .statusCode(statusCode)
+                .message(message)
+                .meta(meta)
+                .timestamp(LocalDateTime.now())
+                .build();
+    }
 }
