@@ -5,12 +5,16 @@ import io.github.j_yuhanwang.food_ordering_app.email_notification.services.Notif
 import io.github.j_yuhanwang.food_ordering_app.enums.NotificationType;
 import io.github.j_yuhanwang.food_ordering_app.response.Response;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * Restricts this controller to the 'dev' profile.
+ * Used for manual smoke testing via Postman.
+ *
  * @author YuhanWang
  * @Date 19/02/2026 10:18 pm
  */
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/test")
+@Profile("dev") // Ensures this debug tool is not loaded in production to maintain security
 public class EmailTestController {
     private final NotificationService notificationService;
 
