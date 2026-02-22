@@ -1,0 +1,15 @@
+### Test uploading images to AWS S3
+POST http://localhost:8090/api/test/aws/upload-file
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="file"; filename="test_image1.png"
+
+< C:\Users\wangy\Desktop\sd-img\00231-2193400808.png
+
+--MyBoundary--
+
+---
+### Test deleting images from AWS S3
+DELETE http://localhost:8090/api/test/aws/delete-file?keyName=test-folder/f143cce3-d49d-4aa3-935a-9f4dd8b590f9_test_image1.png
+
