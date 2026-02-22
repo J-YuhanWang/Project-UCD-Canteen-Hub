@@ -1,4 +1,4 @@
-package io.github.j_yuhanwang.food_ordering_app.email_notification.response;
+package io.github.j_yuhanwang.food_ordering_app.response;
 
 import io.github.j_yuhanwang.food_ordering_app.response.Response;
 import org.junit.jupiter.api.DisplayName;
