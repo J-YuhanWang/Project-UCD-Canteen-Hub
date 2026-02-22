@@ -1,0 +1,3 @@
+### Test sending verification email
+POST http://localhost:8090/api/test/send-email?email=yuhan.wang4@ucdconnect.ie
+Content-Type: application/json
