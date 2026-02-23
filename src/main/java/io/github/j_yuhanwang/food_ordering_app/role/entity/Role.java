@@ -29,7 +29,6 @@ public class Role {
 
     /**
      * The unique name of the role.
-     * <p>
      * By convention in Spring Security, roles should typically start with the "ROLE_" prefix
      * (e.g., "ROLE_ADMIN", "ROLE_CUSTOMER").
      * Must be unique to avoid permission conflicts.

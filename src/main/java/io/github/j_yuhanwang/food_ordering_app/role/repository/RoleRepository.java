@@ -22,4 +22,7 @@ public interface RoleRepository extends JpaRepository<Role,Long> {
      * @return Optional containing the Role object if found.
      */
     Optional<Role> findByName(String name);
+
+    //fast search
+    boolean existsByName(String name);
 }
