@@ -1,0 +1,59 @@
+### 1.Create Role: ROLE_STUDENT - happy path
+POST http://localhost:8090/api/roles
+Content-Type: application/json
+
+{
+  "name": "ROLE_STUDENT"
+}
+
+### 2.Create Role: ROLE_STUDENT - duplicate name - sad path (should return 400)
+POST http://localhost:8090/api/roles
+Content-Type: application/json
+
+{
+  "name": "ROLE_STUDENT"
+}
+
+### 3.Update Role: duplicate name - sad path (should return 400)
+PUT http://localhost:8090/api/roles
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "ROLE_STUDENT"
+}
+
+### 4.Update Role: unexisted id - sad path (should return 404)
+PUT http://localhost:8090/api/roles
+Content-Type: application/json
+
+{
+  "id": 2,
+  "name": "ROLE_ADMIN"
+}
+
+### 5.Update Role  - happy path
+PUT http://localhost:8090/api/roles
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "ROLE_ADMIN"
+}
+
+### 6.Get All Roles (Check if data is present)
+GET http://localhost:8090/api/roles
+
+### 7.Delete Role (id from step 1)
+DELETE http://localhost:8090/api/roles/1
+
+### 8.Create Role - Empty Name -Sad Path (Should return 400)
+POST http://localhost:8090/api/roles
+Content-Type: application/json
+
+{
+  "name": ""
+}
+
+### 9. Delete Role - Not Found (Sad Path - Should return 404)
+DELETE http://localhost:8090/api/roles/999
