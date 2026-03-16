@@ -59,7 +59,8 @@ public class User {
 
     // Defaults to 'ACTIVE' status upon creation unless specified otherwise
     @Enumerated(EnumType.STRING)
-    private UserStatus userStatus;
+    @Builder.Default
+    private UserStatus userStatus = UserStatus.ACTIVE;
 
     // Auditing Fields
     // Automatically populated when the entity is persisted
