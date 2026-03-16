@@ -3,6 +3,7 @@ package io.github.j_yuhanwang.food_ordering_app.exceptions;
 import io.github.j_yuhanwang.food_ordering_app.response.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -74,6 +75,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Response<?>> handlerUserAlreadyExists(UserAlreadyExistsException ex){
         return buildErrorResponse(HttpStatus.CONFLICT,ex.getMessage());
+    }
+
+    /**
+     * Handle MethodArgumentNotValidException: 400
+     * Triggered automatically by Spring when @Valid validation fails in Controller.
+     */
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<Response<?>> handleValidationException(MethodArgumentNotValidException ex) {
+        //Extract the error message from the first failed validation (or concatenate all errors).
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(org.springframework.validation.FieldError::getDefaultMessage)
+                .collect(java.util.stream.Collectors.joining(", "));
+
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation failed: " + errorMessage);
     }
 
     // =========================================================================
