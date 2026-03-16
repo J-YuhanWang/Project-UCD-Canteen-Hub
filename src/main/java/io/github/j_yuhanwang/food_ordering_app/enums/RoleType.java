@@ -8,10 +8,10 @@ public enum RoleType {
     //user-student-customer
     ROLE_STUDENT,
     //canteen manager
-    ROLE_MERCHANT,
+    ROLE_MANAGER,
     //school administrator
     ROLE_ADMIN,
-    //runner
-    ROLE_RUNNER
+    //delivery
+    ROLE_DELIVERY
 
 }
