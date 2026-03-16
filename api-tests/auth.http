@@ -1,0 +1,43 @@
+### 1.Register - happy path
+POST http://localhost:8090/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Blair",
+  "email": "blair.test@example.com",
+  "password": "blair123",
+  "address": "123 UCD",
+  "phoneNumber": "0871234567",
+  "roles": ["ROLE_STUDENT","ROLE_ADMIN"]
+}
+
+### 2.Register failure - sad path - existed email
+POST http://localhost:8090/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Nini",
+  "email": "blair.test@example.com",
+  "password": "nini123",
+  "address": "123 UCD campus",
+  "phoneNumber": "0871234567",
+  "roles": ["ROLE_STUDENT"]
+}
+
+### 3.Login- Happy path
+POST http://localhost:8090/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "blair.test@example.com",
+  "password": "blair123"
+}
+
+### 4.Login failure - Sad path - wrong password
+POST http://localhost:8090/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "blair.test@example.com",
+  "password": "123123123"
+}
