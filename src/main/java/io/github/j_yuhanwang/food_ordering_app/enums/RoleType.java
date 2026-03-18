@@ -11,7 +11,7 @@ public enum RoleType {
     ROLE_MANAGER,
     //school administrator
     ROLE_ADMIN,
-    //delivery
-    ROLE_DELIVERY
+//    //delivery
+//    ROLE_DELIVERY
 
 }

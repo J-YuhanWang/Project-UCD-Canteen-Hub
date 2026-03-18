@@ -80,7 +80,6 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(newUser);
         // 5. Return sanitized UserDTO (excluding sensitive data like password)
         log.info("User registered successfully.");
-        //TODO: Modified the unit testing part about userMapper
         return userMapper.toDTO(savedUser);
     }
 
