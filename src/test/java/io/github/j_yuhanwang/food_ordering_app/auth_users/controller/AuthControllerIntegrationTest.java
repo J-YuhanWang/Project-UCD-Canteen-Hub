@@ -112,6 +112,8 @@ public class AuthControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.data.name").value("RegisterUser"))
                 .andExpect(jsonPath("$.data.email").value("register@example.com"))
+                .andExpect(jsonPath("$.data.address").value("UCD campus"))
+                .andExpect(jsonPath("$.data.phoneNumber").value("0871234567"))
                 .andExpect(jsonPath("$.data.roles[0].name").value("ROLE_STUDENT"))
                 .andExpect(jsonPath("$.data.active").value(true));
         assertTrue(userRepository.existsByEmail("register@example.com"));
