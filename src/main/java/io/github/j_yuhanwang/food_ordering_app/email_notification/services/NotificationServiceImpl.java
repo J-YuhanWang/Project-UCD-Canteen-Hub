@@ -28,7 +28,7 @@ public class NotificationServiceImpl implements NotificationService{
     @Async
     @Override
     public void sendVerificationEmail(NotificationDTO notificationDTO) {
-        log.info("Inside sendVerificatioinEmail()");
+        log.info("Inside sendVerificationEmail()");
         try{
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(
