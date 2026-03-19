@@ -40,12 +40,14 @@ public class CanteenDTO {
     private boolean isOpen;
 
     @JsonFormat(pattern = "HH:mm")
-    private LocalTime currentOpeningTime;
+    private LocalTime todayOpeningTime;
 
     @JsonFormat(pattern = "HH:mm")
-    private LocalTime currentClosingTime;
+    private LocalTime todayClosingTime;
 
     private List<CanteenScheduleDTO> schedules;
+
+    private List<HolidayScheduleDTO> holidays;
 
     //List<MenuDTO> menus and User manager not shown in DTO
 }
