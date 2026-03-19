@@ -41,5 +41,6 @@ public interface UserService {
     //3.2 change user status, BANNED/ACTIVE
     void updateUserStatus(Long userId, UserStatus status);
 
+    //3.3 change user role
     void updateUserRole(Long userId, RoleType role);
 }

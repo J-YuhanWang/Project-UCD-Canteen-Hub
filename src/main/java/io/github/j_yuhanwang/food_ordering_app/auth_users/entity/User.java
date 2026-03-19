@@ -60,6 +60,7 @@ public class User {
     // Defaults to 'ACTIVE' status upon creation unless specified otherwise
     @Enumerated(EnumType.STRING)
     @Builder.Default
+    @Column(name = "user_status", length = 20)
     private UserStatus userStatus = UserStatus.ACTIVE;
 
     // Auditing Fields

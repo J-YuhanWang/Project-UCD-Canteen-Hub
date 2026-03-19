@@ -41,3 +41,4 @@ Thumbs.db
 ### Sensitive config ###
 application.properties
 application.yml
+*.env.json

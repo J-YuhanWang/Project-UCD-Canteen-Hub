@@ -1,0 +1,63 @@
+### 1. Self-service api
+### 1.1 get current account
+GET {{host}}/api/v1/users/me
+Authorization: Bearer {{user_token}}
+Accept: application/json
+
+### 1.2 update account details
+PUT {{host}}/api/v1/users/me
+Authorization: Bearer {{user_token}}
+Content-Type: application/json
+
+{
+  "name": "Yuhan",
+  "phoneNumber": "0871111111",
+  "address": "Roebuck Halls, UCD"
+}
+
+### 1.3 upload avatar
+POST {{host}}/api/v1/users/me/avatar
+Authorization: Bearer {{user_token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test-avatar.jpg"
+Content-Type: image/jpeg
+
+< ./OIP.jpg
+--WebAppBoundary--
+
+---
+
+### 1.4 change password
+PUT {{host}}/api/v1/users/me/password
+Authorization: Bearer {{user_token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "han123",
+  "newPassword": "newPassword456",
+  "confirmPassword": "newPassword456"
+}
+
+### 1.5 deactivate account(INACTIVE/ACTIVE)
+DELETE {{host}}/api/v1/users/me
+Authorization: Bearer {{user_token}}
+
+### =======================================
+### 2. Admin-only api
+### 2.1 fetch all users (Student token--failure)
+GET {{host}}/api/v1/users
+Authorization: Bearer {{user_token}}
+
+### 2.2 fetch all users (Admin token--Succeed)
+GET {{host}}/api/v1/users
+Authorization: Bearer {{admin_token}}
+
+### 2.3 change user status, BANNED/ACTIVE
+PUT {{host}}/api/v1/users/{{test_user_id}}/status?status=BANNED
+Authorization: Bearer {{admin_token}}
+
+### 2.3 change user role
+PUT {{host}}/api/v1/users/{{test_user_id}}/role?role=ROLE_MANAGER
+Authorization: Bearer {{admin_token}}
