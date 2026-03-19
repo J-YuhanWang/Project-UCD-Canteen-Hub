@@ -20,7 +20,8 @@ import java.time.LocalTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Setter
+@Getter
 @Entity
 // Ensures a canteen cannot have duplicate schedules for the same day (e.g., two entries for MONDAY)
 @Table(name = "canteen_schedules", uniqueConstraints = {
@@ -33,7 +34,6 @@ public class CanteenSchedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "canteen_id", nullable = false)
-    @ToString.Exclude
     private Canteen canteen;
 
     /**

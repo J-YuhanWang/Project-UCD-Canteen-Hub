@@ -26,7 +26,8 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Builder
-@Data
+@Getter
+@Setter
 @Table(name = "canteens")
 public class Canteen {
     @Id
@@ -46,6 +47,8 @@ public class Canteen {
     @Column(length = 500)
     private String description;
 
+    private String imageUrl;
+
     /**
      * The list of menus offered by this canteen.
      * <p>
@@ -53,7 +56,6 @@ public class Canteen {
      */
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @Builder.Default
-    @ToString.Exclude
     private List<Menu> menus = new ArrayList<>();
 
     /**
@@ -63,18 +65,17 @@ public class Canteen {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id", referencedColumnName = "id", unique = true)
     @JsonIgnore
-    @ToString.Exclude
     private User manager;
 
-//    @Builder.Default
-//    private boolean isDeleted=false;
+    @Builder.Default
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted=false;
 
     /**
      * Standard weekly operating schedules (e.g., Mon-Fri 9am-5pm).
      */
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @Builder.Default //Without this annotation, Lombok will neglect the initialized value
-    @ToString.Exclude
     private List<CanteenSchedule> canteenSchedules = new ArrayList<>();
 
     /**
@@ -83,6 +84,5 @@ public class Canteen {
      */
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @Builder.Default
-    @ToString.Exclude
     private List<HolidaySchedule> holidaySchedules = new ArrayList<>();
 }

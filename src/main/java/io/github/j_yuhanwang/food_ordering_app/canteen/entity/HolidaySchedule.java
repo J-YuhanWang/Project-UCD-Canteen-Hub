@@ -24,7 +24,8 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
+@Setter
+@Getter
 @Table(name = "holiday_schedules")
 public class HolidaySchedule {
     @Id
@@ -33,7 +34,6 @@ public class HolidaySchedule {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "canteen_id", nullable = false)
-    @ToString.Exclude
     private Canteen canteen;
 
     /**
