@@ -1,11 +1,11 @@
 package io.github.j_yuhanwang.food_ordering_app.aws.services;
 
-import io.github.j_yuhanwang.food_ordering_app.exceptions.AccessDeniedException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.BadRequestException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.FileStorageException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;

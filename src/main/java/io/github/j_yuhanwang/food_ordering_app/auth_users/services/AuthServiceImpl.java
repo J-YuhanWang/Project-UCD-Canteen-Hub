@@ -8,16 +8,15 @@ import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.mapper.UserMapper;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.repository.UserRepository;
 import io.github.j_yuhanwang.food_ordering_app.enums.UserStatus;
-import io.github.j_yuhanwang.food_ordering_app.exceptions.AccessDeniedException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.BadRequestException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.ResourceNotFoundException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.UserAlreadyExistsException;
-import io.github.j_yuhanwang.food_ordering_app.role.dtos.RoleDTO;
 import io.github.j_yuhanwang.food_ordering_app.role.entity.Role;
 import io.github.j_yuhanwang.food_ordering_app.role.repository.RoleRepository;
 import io.github.j_yuhanwang.food_ordering_app.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

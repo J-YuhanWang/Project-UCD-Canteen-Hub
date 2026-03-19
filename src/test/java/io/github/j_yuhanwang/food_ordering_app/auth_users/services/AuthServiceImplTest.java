@@ -8,7 +8,6 @@ import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.mapper.UserMapper;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.repository.UserRepository;
 import io.github.j_yuhanwang.food_ordering_app.enums.UserStatus;
-import io.github.j_yuhanwang.food_ordering_app.exceptions.AccessDeniedException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.BadRequestException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.ResourceNotFoundException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.UserAlreadyExistsException;
@@ -22,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;

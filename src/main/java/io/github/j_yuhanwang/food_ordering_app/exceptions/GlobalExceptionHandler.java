@@ -3,6 +3,7 @@ package io.github.j_yuhanwang.food_ordering_app.exceptions;
 import io.github.j_yuhanwang.food_ordering_app.response.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -57,9 +58,10 @@ public class GlobalExceptionHandler {
      * Handle 403 Forbidden: Triggered when a logged-in user lacks the required permissions.
      */
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Response<?>> handlerAccessDenied(AccessDeniedException ex){
-        return buildErrorResponse(HttpStatus.FORBIDDEN,ex.getMessage());
+    public ResponseEntity<Response<?>> handleAccessDenied(AccessDeniedException ex) {
+        return buildErrorResponse(HttpStatus.FORBIDDEN, "Access Denied: You do not have permission to access this resource."+ex.getMessage());
     }
+
 
     /**
      * Handle 404 Not Found: Triggered when a requested resource (User, Menu, Order) does not exist.
