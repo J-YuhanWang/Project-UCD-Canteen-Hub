@@ -1,6 +1,7 @@
 package io.github.j_yuhanwang.food_ordering_app.exceptions;
 
 import io.github.j_yuhanwang.food_ordering_app.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
  * @author YuhanWang
  * @Date 04/02/2026 10:14 pm
  */
+@Slf4j
 @RestControllerAdvice //Intercept global exceptions
 public class GlobalExceptionHandler {
     /**
@@ -43,6 +45,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Response<?>> handlerBadRequest(BadRequestException ex){
+        log.warn("[400 BAD_REQUEST] Business logic failed: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.BAD_REQUEST,ex.getMessage());
     }
 
@@ -51,6 +54,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<Response<?>> handlerUnauthorizedAccess(UnauthorizedAccessException ex){
+        log.warn("[401 UNAUTHORIZED] Authentication failed: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.UNAUTHORIZED,ex.getMessage());
     }
 
@@ -59,6 +63,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Response<?>> handleAccessDenied(AccessDeniedException ex) {
+        log.warn("[403 FORBIDDEN] Access denied for current user: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.FORBIDDEN, "Access Denied: You do not have permission to access this resource."+ex.getMessage());
     }
 
@@ -68,6 +73,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Response<?>> handleResourceNotFound(ResourceNotFoundException ex){
+        log.warn("[404 NOT_FOUND] Resource lookup failed: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.NOT_FOUND,ex.getMessage());
     }
 
@@ -76,6 +82,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<Response<?>> handlerUserAlreadyExists(UserAlreadyExistsException ex){
+        log.warn("[409 CONFLICT] Resource already exists: {}", ex.getMessage());
         return buildErrorResponse(HttpStatus.CONFLICT,ex.getMessage());
     }
 
@@ -90,6 +97,8 @@ public class GlobalExceptionHandler {
                 .map(org.springframework.validation.FieldError::getDefaultMessage)
                 .collect(java.util.stream.Collectors.joining(", "));
 
+        //IMPORTANT!
+        log.warn("[400 VALIDATION_FAILED] Client input validation error: {}", errorMessage);
         return buildErrorResponse(HttpStatus.BAD_REQUEST, "Validation failed: " + errorMessage);
     }
 
@@ -102,6 +111,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(PaymentProcessingException.class)
     public ResponseEntity<Response<?>> handlerPaymentProcessing(PaymentProcessingException ex){
+        log.error("[502 BAD_GATEWAY] External payment gateway error: ", ex);
         return buildErrorResponse(HttpStatus.BAD_GATEWAY,ex.getMessage());
     }
 
@@ -110,6 +120,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(EmailDeliveryException.class)
     public ResponseEntity<Response<?>> handlerEmailDeliveryError(EmailDeliveryException ex){
+        log.error("[503 SERVICE_UNAVAILABLE] Email delivery service failed: ", ex);
         return buildErrorResponse(HttpStatus.SERVICE_UNAVAILABLE,"Email service busy: " + ex.getMessage());
     }
 
@@ -118,6 +129,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(FileStorageException.class)
     public ResponseEntity<Response<?>> handlerFileStorageError(FileStorageException ex){
+        log.error("[500 INTERNAL_SERVER_ERROR] File storage operation failed: ", ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "File upload failed: " + ex.getMessage());
     }
 
@@ -126,6 +138,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Response<?>> handleGlobalException(Exception ex){
+        log.error("[500 UNEXPECTED_ERROR] Critical system failure: ", ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred: " + ex.getMessage());
     }
 
