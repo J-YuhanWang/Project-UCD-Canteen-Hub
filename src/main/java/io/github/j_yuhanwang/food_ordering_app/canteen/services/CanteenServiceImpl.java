@@ -7,10 +7,13 @@ import io.github.j_yuhanwang.food_ordering_app.canteen.dtos.CanteenDTO;
 import io.github.j_yuhanwang.food_ordering_app.canteen.dtos.CanteenScheduleDTO;
 import io.github.j_yuhanwang.food_ordering_app.canteen.dtos.HolidayScheduleDTO;
 import io.github.j_yuhanwang.food_ordering_app.canteen.entity.Canteen;
+import io.github.j_yuhanwang.food_ordering_app.canteen.entity.CanteenSchedule;
+import io.github.j_yuhanwang.food_ordering_app.canteen.entity.HolidaySchedule;
 import io.github.j_yuhanwang.food_ordering_app.canteen.mapper.CanteenMapper;
 import io.github.j_yuhanwang.food_ordering_app.canteen.mapper.CanteenScheduleMapper;
 import io.github.j_yuhanwang.food_ordering_app.canteen.mapper.HolidayScheduleMapper;
 import io.github.j_yuhanwang.food_ordering_app.canteen.repository.CanteenRepository;
+import io.github.j_yuhanwang.food_ordering_app.canteen.repository.HolidayScheduleRepository;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.BadRequestException;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.UUID;
+import java.time.DayOfWeek;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author YuhanWang
@@ -37,6 +41,7 @@ public class CanteenServiceImpl implements CanteenService{
     private final CanteenScheduleMapper canteenScheduleMapper;
     private final HolidayScheduleMapper holidayScheduleMapper;
     private final AwsS3Service awsS3Service;
+    private final HolidayScheduleRepository holidayScheduleRepository;
 
     //1. -----for all users-----
     @Override
@@ -175,7 +180,7 @@ public class CanteenServiceImpl implements CanteenService{
 
         //3.Core business logic validation: Is the user already a manager at other restaurant?
         canteenRepository.findByManagerAndDeletedIsFalse(manager).ifPresent(otherCanteen->{
-            if(otherCanteen.getId().equals(canteenId)){
+            if(!otherCanteen.getId().equals(canteenId)){
                 log.warn("Assign manager failed: User [{}] is already managing Canteen [{}]",
                         manager.getName(), otherCanteen.getName());
                 throw new BadRequestException("This user is already a manager of another canteen!");
@@ -193,19 +198,110 @@ public class CanteenServiceImpl implements CanteenService{
 
     //------3.for schedules modification------
     @Override
+    @Transactional
     public HolidayScheduleDTO addHolidaySchedule(Long canteenId, HolidayScheduleDTO holidayDTO) {
-        log.info("Inside addHolidaySchedule");
-        return null;
+        log.info("Attempting to add holiday schedule for Canteen ID: {}", canteenId);
+        //1.verify if the canteen exists
+        Canteen canteen = canteenRepository.findByIdAndIsDeletedFalse(canteenId).orElseThrow(
+                ()->new ResourceNotFoundException("Canteen","id",canteenId)
+        );
+
+        //2.Duplicate checking: Preventing the same restaurant from adding two holidays on the same day (defensive programming)
+        boolean alreadyExist = canteen.getHolidaySchedules().stream()
+                .anyMatch(h->h.getSpecificDate().equals(holidayDTO.getSpecificDate()));
+        if(alreadyExist){
+            log.warn("Holiday schedule for date [{}] already exists in Canteen [{}]",
+                    holidayDTO.getSpecificDate(), canteen.getName());
+            throw new BadRequestException("A holiday schedule for this date already exists!");
+        }
+        //3. if not exist, then holidaySchedule add canteen
+        HolidaySchedule holiday = holidayScheduleMapper.toEntity(holidayDTO);
+        //Because `@ManyToOne(name="canteen_id")` in the `HolidaySchedule` entity is the relationship maintainer.
+        holiday.setCanteen(canteen);
+
+        //4. save and return
+        HolidaySchedule savedHoliday = holidayScheduleRepository.save(holiday);
+        log.info("Successfully added holiday schedule for date [{}] to Canteen [{}]",
+                savedHoliday.getSpecificDate(), canteen.getName());
+
+        return holidayScheduleMapper.toDTO(savedHoliday);
     }
 
     @Override
-    public void removeHolidaySchedule(Long canteenId, Long HolidayId) {
-        log.info("Inside removeHolidaySchedule");
+    @Transactional
+    public void removeHolidaySchedule(Long canteenId, Long holidayId) {
+        log.info("Attempting to remove holiday id [{}] from Canteen ID [{}]", holidayId, canteenId);
+        Canteen canteen = canteenRepository.findByIdAndIsDeletedFalse(canteenId).orElseThrow(
+                ()->new ResourceNotFoundException("Canteen","id",canteenId)
+        );
+        HolidaySchedule holiday = holidayScheduleRepository.findById(holidayId).orElseThrow(
+                ()->new ResourceNotFoundException("Holiday","id",holidayId)
+        );
+        // Core Defense: Preventing Horizontal Privilege Escalation
+        // Suppose a hacker knows that restaurant A's holidayId is 45, and maliciously calls /canteens/999(restaurant B)/holidays/45
+        // in an attempt to delete other people's data. This verification will block this type of attack
+        if(!holiday.getCanteen().getId().equals(canteenId)){
+            log.error("Security Alert: Attempt to delete holiday [{}] that does not belong to Canteen [{}]",
+                    holidayId, canteenId);
+            throw new BadRequestException("This holiday schedule does not belong to the specified canteen.");
+        }
+
+        holidayScheduleRepository.delete(holiday);
+        log.info("Successfully deleted holiday schedule ID [{}] for Canteen [{}]", holidayId, canteen.getName());
     }
 
     @Override
+    @Transactional
     public List<CanteenScheduleDTO> updateWeeklySchedules(Long canteenId, List<CanteenScheduleDTO> scheduleDTOs) {
-        log.info("Inside updateWeeklySchedules");
-        return List.of();
+        log.info("Attempting to synchronize weekly schedules for Canteen ID: {}", canteenId);
+        // 1.fetch the canteen
+        Canteen canteen = canteenRepository.findByIdAndIsDeletedFalse(canteenId).orElseThrow(
+                ()->new ResourceNotFoundException("Canteen","id",canteenId)
+        );
+
+        // 2.Convert the existing work schedule in the database into a Map, using the day of the week (DayOfWeek) as the key.
+        //The advantage is that the complexity of subsequently searching for the existence of a specific day drops dramatically from O(N) to O(1), resulting in extremely fast lookups.
+        Map<DayOfWeek, CanteenSchedule> existingScheduleMap = canteen.getCanteenSchedules().stream()
+                .collect(Collectors.toMap(CanteenSchedule::getDayOfWeek,schedule->schedule));
+
+        //Record exactly which days the frontend sent (to identify which days were subsequently deleted by the frontend).
+        Set<DayOfWeek> incomingDays = new HashSet<>();
+
+        //3.Core comparison: Iterates through the DTO list sent from the front end
+        for(CanteenScheduleDTO dto: scheduleDTOs){
+            incomingDays.add(dto.getDayOfWeek());
+
+            //3.1 if the day of week already exists in the database: update the value
+            if(existingScheduleMap.containsKey(dto.getDayOfWeek())){
+                //update new schedule(opening time,closing time, isClosed) to old schedule
+                CanteenSchedule existingSchedule = existingScheduleMap.get(dto.getDayOfWeek());
+                //JPA(Java Persistence API) Managed State and Dirty checking, can set entity's attribute from dto fields directly
+                existingSchedule.setOpeningTime(dto.getOpeningTime());
+                existingSchedule.setClosingTime(dto.getClosingTime());
+                existingSchedule.setClosed(dto.isClosed());
+
+            }else {
+                //3.2 if the day of week does not exist in the database: insert
+                CanteenSchedule newSchedule = canteenScheduleMapper.toEntity(dto);
+                newSchedule.setCanteen(canteen);
+                canteen.getCanteenSchedules().add(newSchedule);
+            }
+        }
+
+        // 4.If the old schedule's DayOfWeek is not in incomingDays, remove it from the list.
+        //Due to orphanRemoval = true, the removed entity will be automatically converted into a DELETE statement by JPA.
+        canteen.getCanteenSchedules().removeIf(
+                existingSchedule-> !incomingDays.contains(existingSchedule.getDayOfWeek())
+        );
+
+        //5. Save (because cascade = CascadeType.ALL is configured, saving Canteen will automatically trigger
+        // all the above add, delete, and modify operations)
+        Canteen savedCanteen = canteenRepository.save(canteen);
+        log.info("Successfully synchronized weekly schedules for Canteen ID: {}", canteenId);
+
+        //6.Convert the saved (even with newly generated IDs) latest schedule list into a DTO list and return it to the front end.
+        return savedCanteen.getCanteenSchedules().stream()
+                .map(canteenScheduleMapper::toDTO) //(java8: className::functionName)
+                .toList();
     }
 }

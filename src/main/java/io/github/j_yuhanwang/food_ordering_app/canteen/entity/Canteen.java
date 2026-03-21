@@ -74,7 +74,7 @@ public class Canteen {
     /**
      * Standard weekly operating schedules (e.g., Mon-Fri 9am-5pm).
      */
-    @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default //Without this annotation, Lombok will neglect the initialized value
     private List<CanteenSchedule> canteenSchedules = new ArrayList<>();
 
@@ -82,7 +82,7 @@ public class Canteen {
      * Special schedules for specific dates (e.g., Bank Holidays, Christmas),
      * which override the standard weekly schedule.
      */
-    @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<HolidaySchedule> holidaySchedules = new ArrayList<>();
 }
