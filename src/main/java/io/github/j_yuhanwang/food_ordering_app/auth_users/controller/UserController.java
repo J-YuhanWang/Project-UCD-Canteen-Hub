@@ -28,7 +28,6 @@ public class UserController {
     private final UserService userService;
 
     //1. Self-service API
-
     @GetMapping("/me")
     public Response<UserDTO> getMyProfile(){
         log.info("API request: Get current user profile");

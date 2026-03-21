@@ -56,8 +56,6 @@ public class CanteenServiceImpl implements CanteenService {
         return dto;
     }
 
-
-
     //1.2 get All Canteens
     @Override
     public List<CanteenDTO> getAllCanteens() {

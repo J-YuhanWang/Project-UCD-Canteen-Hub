@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date 16/03/2026 3:48 pm
  */
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;

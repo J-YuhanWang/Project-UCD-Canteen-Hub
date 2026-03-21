@@ -15,7 +15,7 @@ import java.util.List;
  * @Date 23/02/2026 3:30 pm
  */
 @RestController
-@RequestMapping("/api/roles")
+@RequestMapping("/api/v1/roles")
 @RequiredArgsConstructor
 //@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class RoleController {
