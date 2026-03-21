@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.DayOfWeek;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,8 +49,14 @@ public class CanteenServiceImpl implements CanteenService {
     public CanteenDTO getCanteenById(Long canteenId) {
         log.info("Inside getCanteenById");
         Canteen canteen = findCanteenById(canteenId);
-        return canteenMapper.toDTO(canteen);
+        CanteenDTO dto =  canteenMapper.toDTO(canteen);
+
+        //Dynamically calculate the canteen's [today's opening/closing hours] and [current opening status]
+        enrichCanteenDTOWithTodayStatus(dto,canteen);
+        return dto;
     }
+
+
 
     //1.2 get All Canteens
     @Override
@@ -58,7 +64,12 @@ public class CanteenServiceImpl implements CanteenService {
         log.info("Inside getAllCanteens");
         List<Canteen> canteenList = canteenRepository.findAllByIsDeletedFalse();
         return canteenList.stream()
-                .map(canteenMapper::toDTO)
+                .map(canteen -> {
+                    CanteenDTO dto = canteenMapper.toDTO(canteen);
+                    //Dynamically calculate the canteen's [today's opening/closing hours] and [current opening status]
+                    enrichCanteenDTOWithTodayStatus(dto,canteen);
+                    return dto;
+                })
                 .toList();
     }
 
@@ -75,6 +86,7 @@ public class CanteenServiceImpl implements CanteenService {
         }
         Canteen canteen = canteenMapper.toEntity(canteenDTO);
         Canteen savedCanteen = canteenRepository.save(canteen);
+
         return canteenMapper.toDTO(savedCanteen);
     }
 
@@ -189,7 +201,7 @@ public class CanteenServiceImpl implements CanteenService {
         //4. Binding: Canteen is the maintainer of the relationship (owns @JoinColumn)
         canteen.setManager(manager);
         //5.update Canteen
-        Canteen savedCanteen = canteenRepository.save(canteen);
+        canteenRepository.save(canteen);
 
         log.info("Successfully assigned User [{}] as manager for Canteen [{}]",
                 manager.getName(), canteen.getName());
@@ -254,24 +266,24 @@ public class CanteenServiceImpl implements CanteenService {
     @Transactional
     public List<CanteenScheduleDTO> updateWeeklySchedules(Long canteenId, List<CanteenScheduleDTO> scheduleDTOs) {
         log.info("Attempting to synchronize weekly schedules for Canteen ID: {}", canteenId);
-        // 1.fetch the canteen
+        // 3.3.1.fetch the canteen
         Canteen canteen = findCanteenById(canteenId);
 
-        // 2. Validate the data sent from the front end:
-        // 2.1check for duplicate DayOfWeek entries
-        // 2.2 check for door opening/closing times transmitted across different days
+        // 3.3.2. Validate the data sent from the front end:
+        // 3.3.2.1check for duplicate DayOfWeek entries
+        // 3.3.2.2 check for door opening/closing times transmitted across different days
         validateIncomingSchedules(scheduleDTOs);
 
-        //3.Synchronize the schedule passed from the front end.
+        //3.3.3.Synchronize the schedule passed from the front end.
         syncScheduleLogic(canteen, scheduleDTOs);
 
-        //4. Save (because cascade = CascadeType.ALL is configured, saving Canteen will automatically trigger
+        //3.3.4. Save (because cascade = CascadeType.ALL is configured, saving Canteen will automatically trigger
         // all the above add, delete, and modify operations)
         Canteen savedCanteen = canteenRepository.save(canteen);
 
         log.info("Successfully synchronized weekly schedules for Canteen ID: {}", canteenId);
 
-        //5.Convert the saved (even with newly generated IDs) latest schedule list into a DTO list and return it to the front end.
+        //3.3.5.Convert the saved (even with newly generated IDs) latest schedule list into a DTO list and return it to the front end.
         return savedCanteen.getCanteenSchedules().stream()
                 .map(canteenScheduleMapper::toDTO) //(java8: className::functionName)
                 .toList();
@@ -292,7 +304,7 @@ public class CanteenServiceImpl implements CanteenService {
             }
 
             //Validation2: check for door opening/closing times transmitted across different days
-            //If not have rest, openning time must earlier than closing time
+            // If the canteen is not closed, the opening time must be strictly before the closing time.
             if(!dto.isClosed() && dto.getOpeningTime()!=null && dto.getClosingTime()!=null){
                 if(dto.getOpeningTime().isAfter(dto.getClosingTime())){
                     log.warn("Invalid time range for {}: {} to {}",
@@ -320,7 +332,7 @@ public class CanteenServiceImpl implements CanteenService {
         for (CanteenScheduleDTO dto : scheduleDTOs) {
             incomingDays.add(dto.getDayOfWeek());
 
-            //2.1 if the day of week already exists in the database: update the value
+            //1 if the day of week already exists in the database: update the value
             if (existingScheduleMap.containsKey(dto.getDayOfWeek())) {
                 //update new schedule(opening time,closing time, isClosed) to old schedule
                 CanteenSchedule existingSchedule = existingScheduleMap.get(dto.getDayOfWeek());
@@ -331,7 +343,7 @@ public class CanteenServiceImpl implements CanteenService {
                 updated++;
 
             } else {
-                //2.2 if the day of week does not exist in the database: insert
+                //2 if the day of week does not exist in the database: insert
                 CanteenSchedule newSchedule = canteenScheduleMapper.toEntity(dto);
                 newSchedule.setCanteen(canteen);
                 canteen.getCanteenSchedules().add(newSchedule);
@@ -351,7 +363,13 @@ public class CanteenServiceImpl implements CanteenService {
         log.info("Schedule sync details for Canteen {}: {} added, {} updated, {} removed.",canteen.getId(),added,updated,removed);
     }
 
-    //------4.helper method------
+    //------4.private utility methods ------
+
+    /**
+     * 4.1 Unified entry point for obtaining and validating canteen entities
+     * @param canteenId Fetch the canteen by id
+     * @return canteen entity
+     */
     private Canteen findCanteenById(Long canteenId) {
         return canteenRepository.findByIdAndIsDeletedFalse(canteenId).
                 orElseThrow(() -> {
@@ -360,6 +378,64 @@ public class CanteenServiceImpl implements CanteenService {
                 });
     }
 
+    /**
+     * 4.2 Dynamically calculate the canteen's [today's opening/closing hours] and [current opening status]
+     * Logic: Holiday scheduling priority > Regular weekly scheduling
+     */
+    private void enrichCanteenDTOWithTodayStatus(CanteenDTO dto,Canteen entity) {
+        //4.2.1.Use Dublin time zone (Ireland)
+        ZoneId dublinZone = ZoneId.of("Europe/Dublin");
+        ZonedDateTime nowInDublin = ZonedDateTime.now(dublinZone);
 
+        LocalDate todayDate = nowInDublin.toLocalDate();
+        LocalTime currentTime = nowInDublin.toLocalTime();
+        DayOfWeek todayDayOfWeek = nowInDublin.getDayOfWeek();
 
+        //4.2.2. Define the default status of isOpen, openingTime, closingTime
+        dto.setOpen(false);
+        dto.setTodayOpeningTime(null);
+        dto.setTodayClosingTime(null);
+
+        //4.2.3.Check if it's a holiday; if so, `isOpen` = false, and the door opening/closing time is null.
+        // Since most of the filtered results are empty, use an Optional to receive the return value.
+        Optional<HolidaySchedule> todayHoliday = entity.getHolidaySchedules().stream()
+                .filter(holiday->todayDate.equals(holiday.getSpecificDate()))
+                .findFirst();
+
+        if(todayHoliday.isPresent()){
+            HolidaySchedule holiday = todayHoliday.get();
+            applyScheduleToDTO(dto, holiday.isClosed(),holiday.getOpeningTime(),holiday.getClosingTime(),currentTime);
+            return;//If it's a holiday, return directly; the regular weekly schedule will not be considered.
+        }
+
+        //4.2.4. Check if there is a regular weekly schedule for today.
+        Optional<CanteenSchedule> todaySchedule = entity.getCanteenSchedules().stream()
+                .filter(schedule -> todayDayOfWeek.equals(schedule.getDayOfWeek()))
+                .findFirst();
+
+        if(todaySchedule.isPresent()){
+            CanteenSchedule schedule = todaySchedule.get();
+            applyScheduleToDTO(dto, schedule.isClosed(),schedule.getOpeningTime(),schedule.getClosingTime(),currentTime);
+        }
+    }
+
+    /**
+     * 4.3 Auxiliary method: Assign values to DTOs based on the extracted scheduling rules
+     * Check if the current time is within the business hours
+     */
+    private void applyScheduleToDTO(CanteenDTO dto, boolean closed, LocalTime openingTime, LocalTime closingTime, LocalTime currentTime) {
+        if(closed || openingTime == null || closingTime == null){
+            dto.setOpen(false);
+            dto.setTodayOpeningTime(null);
+            dto.setTodayClosingTime(null);
+            return;
+        }
+        dto.setTodayOpeningTime(openingTime);
+        dto.setTodayClosingTime(closingTime);
+
+        //Check if the current time is within the business hours(!important!)
+        boolean isOpenNow = !currentTime.isBefore(openingTime)
+                && currentTime.isBefore(closingTime);
+        dto.setOpen(isOpenNow);
+    }
 }
