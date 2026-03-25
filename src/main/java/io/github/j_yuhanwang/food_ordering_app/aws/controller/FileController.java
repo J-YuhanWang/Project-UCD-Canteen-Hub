@@ -4,6 +4,7 @@ import io.github.j_yuhanwang.food_ordering_app.aws.services.AwsS3Service;
 import io.github.j_yuhanwang.food_ordering_app.response.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,6 +35,7 @@ public class FileController {
      * @return The public URL of the uploaded file.
      */
     @PostMapping("/upload")
+    @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public Response<String> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value="folder",defaultValue = "general") String folder){
