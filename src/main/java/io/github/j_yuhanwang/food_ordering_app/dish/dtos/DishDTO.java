@@ -50,12 +50,6 @@ public class DishDTO {
     //Availability Logic
     private boolean isAvailable;
 
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime availableStartTime;
-
-    @JsonFormat(pattern = "HH:mm")
-    private LocalTime availableEndTime;
-
     //Key Relationships
     // Reference ID for database relationships and routing.
     @NotNull(message = "Canteen id is required")
