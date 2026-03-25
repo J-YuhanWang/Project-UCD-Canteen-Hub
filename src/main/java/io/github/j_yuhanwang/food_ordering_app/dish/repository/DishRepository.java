@@ -46,4 +46,7 @@ public interface DishRepository extends JpaRepository<Dish,Long> {
      * @return List of all dish items in that canteen.
      */
     List<Dish> findByCanteenId(Long id);
+
+    List<Dish> findByCanteenIdAndNameContainingIgnoreCase(Long canteenId,String dishName);
+
 }
