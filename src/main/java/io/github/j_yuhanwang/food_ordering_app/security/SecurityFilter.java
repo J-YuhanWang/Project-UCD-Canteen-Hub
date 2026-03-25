@@ -7,6 +7,7 @@ package io.github.j_yuhanwang.food_ordering_app.security;/*
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -35,11 +36,16 @@ public class SecurityFilter {
                 .cors(Customizer.withDefaults())
                 .exceptionHandling(ex->
                         ex.accessDeniedHandler(customAccessDenialHandler).authenticationEntryPoint(customAuthenticationEntryPoint))
-                .authorizeHttpRequests(req->
-                        req.requestMatchers(
-                                "/api/auth/**", "/api/categories/**","/api/menu/**","/api/reviews/**","/api/test/**","/api/roles/**")
-                                .permitAll()
-                                .anyRequest().authenticated())
+                .authorizeHttpRequests(req->req
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                 "/api/v1/canteens/**",
+                                "/api/v1/dishes/**",
+                                "/api/v1/reviews/**"
+                                ).permitAll()
+//                        .requestMatchers("/api/test/**","/api/roles/**")
+//                                .permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(mag->mag.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
