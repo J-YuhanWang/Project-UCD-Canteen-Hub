@@ -1,0 +1,54 @@
+#### 1. uplosd dish image
+POST {{host}}/api/v1/files/upload?folder=dishes
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Bearer {{admin_token}}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test-dish.jpg"
+Content-Type: image/jpeg
+
+< ./test-dish.jpg
+
+--WebAppBoundary--
+
+> {%
+ client.global.set("uploaded_image_url",response.body.data);
+ client.log("Successfully fetch the image url: "+ client.global.get("uploaded_image_url"));
+ %}
+
+#### 2. create dish
+POST {{host}}/api/v1/canteens/1/dishes
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "name": "Classic Irish Stew",
+  "description": "Soft and flavorful, paired with mashed potatoes",
+  "price": 12.5,
+  "foodCategory": "MAIN",
+  "available": true,
+  "imageUrl": "{{uploaded_image_url}}"
+}
+
+#### 3. update dish
+PUT {{host}}/api/v1/dishes/3
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "name": "Pizza",
+  "description": "Soft and flavorful, paired with mashed potatoes",
+  "price": 9.9,
+  "foodCategory": "Pizza",
+  "available": true
+}
+
+#### 4.get dish by id
+GET {{host}}/api/v1/dishes/3
+
+#### 5.get dishes
+GET {{host}}/api/v1/canteens/1/dishes
+
+#### 6.delete dish
+DELETE {{host}}/api/v1/dishes/4
+Authorization: Bearer {{admin_token}}
