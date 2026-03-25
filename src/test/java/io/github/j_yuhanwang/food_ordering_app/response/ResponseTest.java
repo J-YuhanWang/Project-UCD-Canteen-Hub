@@ -39,7 +39,7 @@ public class ResponseTest {
     void testOkWithDataAndCustomMessage(){
         //Arrange
         String testData = "Buzz Coffee";
-        String customMsg = "Menu fetched successfully";
+        String customMsg = "Dish fetched successfully";
 
         //Act
         Response<String> response = Response.ok(testData,customMsg);

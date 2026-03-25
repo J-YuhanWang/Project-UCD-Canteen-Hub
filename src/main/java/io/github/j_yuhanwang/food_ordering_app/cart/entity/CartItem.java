@@ -1,6 +1,6 @@
 package io.github.j_yuhanwang.food_ordering_app.cart.entity;
 
-import io.github.j_yuhanwang.food_ordering_app.menu.entity.Menu;
+import io.github.j_yuhanwang.food_ordering_app.dish.entity.Dish;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -8,9 +8,9 @@ import lombok.*;
 import java.math.BigDecimal;
 
 /**
- * Represents a specific menu item added to the shopping cart.
+ * Represents a specific dish item added to the shopping cart.
  * <p>
- * This entity links a {@link Cart} with a specific {@link Menu} item.
+ * This entity links a {@link Cart} with a specific {@link Dish} item.
  * It tracks the quantity and calculated price for that specific selection.
  *
  * @author BlairWang
@@ -27,7 +27,7 @@ import java.math.BigDecimal;
 @Table(
         name = "cart_items",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"cart_id", "menu_id"})
+                @UniqueConstraint(columnNames = {"cart_id", "dish_id"})
         }
 )
 @Data
@@ -42,9 +42,9 @@ public class CartItem {
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menu_id", nullable = false)
+    @JoinColumn(name = "dish_id", nullable = false)
     @ToString.Exclude
-    private Menu menu;
+    private Dish dish;
 
     /**
      * The number of this specific dish ordered.

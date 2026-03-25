@@ -1,4 +1,4 @@
-package io.github.j_yuhanwang.food_ordering_app.menu.entity;
+package io.github.j_yuhanwang.food_ordering_app.dish.entity;
 
 import io.github.j_yuhanwang.food_ordering_app.canteen.entity.Canteen;
 import io.github.j_yuhanwang.food_ordering_app.order.entity.OrderItem;
@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Represents a specific food item or dish available for purchase.
- * A Menu item belongs to a specific {@link Canteen}. It includes pricing details,
+ * A Dish item belongs to a specific {@link Canteen}. It includes pricing details,
  * availability windows (e.g., Breakfast only), and links to customer reviews.
  *
  * @author BlairWang
@@ -21,7 +21,7 @@ import java.util.List;
  * @date 24/01/2026 9:57 pm
  */
 
-@Table(name = "menus",
+@Table(name = "dishes",
         uniqueConstraints = {
                 @UniqueConstraint(
                         columnNames = {"canteen_id", "name"}
@@ -32,7 +32,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Menu {
+public class Dish {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,8 +51,8 @@ public class Menu {
     private String imageUrl;
 
     /**
-     * The canteen that provides this menu item.
-     * Relationship: Many Menu items belong to One Canteen.
+     * The canteen that provides this dish item.
+     * Relationship: Many Dish items belong to One Canteen.
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "canteen_id", nullable = false)
@@ -63,7 +63,7 @@ public class Menu {
      * Historical record of orders containing this item.
      * Used for sales analysis or popularity ranking.
      */
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
@@ -71,7 +71,7 @@ public class Menu {
     /**
      * Customer reviews specific to this dish.
      */
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "dish", cascade = CascadeType.ALL)
     @ToString.Exclude
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();

@@ -1,7 +1,7 @@
 package io.github.j_yuhanwang.food_ordering_app.review.entity;
 
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
-import io.github.j_yuhanwang.food_ordering_app.menu.entity.Menu;
+import io.github.j_yuhanwang.food_ordering_app.dish.entity.Dish;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -12,7 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 /**
- * Represents a customer's feedback and rating for a specific menu item.
+ * Represents a customer's feedback and rating for a specific dish item.
  * <p>
  * Reviews help other users make decisions and provide valuable feedback to the Canteen.
  *
@@ -39,9 +39,9 @@ public class Review {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menu_id", nullable = false)
+    @JoinColumn(name = "dish_id", nullable = false)
     @ToString.Exclude
-    private Menu menu;
+    private Dish dish;
 
     /**
      * The numeric rating given by the user.

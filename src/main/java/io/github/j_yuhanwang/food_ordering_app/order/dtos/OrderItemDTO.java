@@ -22,10 +22,10 @@ import java.math.BigDecimal;
 public class OrderItemDTO {
     private Long id;
 
-    //Flattened Menu Info
-    private Long menuId;
-    private String menuName;
-    private String menuImageUrl;
+    //Flattened Dish Info
+    private Long dishId;
+    private String dishName;
+    private String dishImageUrl;
 
     //Match Entity Naming
     private BigDecimal pricePerUnit;

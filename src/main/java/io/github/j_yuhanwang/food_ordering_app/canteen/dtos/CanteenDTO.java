@@ -49,5 +49,5 @@ public class CanteenDTO {
 
     private List<HolidayScheduleDTO> holidays;
 
-    //List<MenuDTO> menus and User manager not shown in DTO
+    //List<DishDTO> dishes and User manager not shown in DTO
 }

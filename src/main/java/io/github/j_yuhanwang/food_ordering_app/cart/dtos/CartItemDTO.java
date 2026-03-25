@@ -23,9 +23,9 @@ import java.math.BigDecimal;
 public class CartItemDTO {
     private Long id;
 
-    private Long menuId;
-    private String menuName;
-    private String menuImageUrl;
+    private Long dishId;
+    private String dishName;
+    private String dishImageUrl;
 
     private Integer quantity;
 
@@ -33,7 +33,7 @@ public class CartItemDTO {
 
     private BigDecimal subtotal;
 
-    //The service layer will calculate this value based on Menu.isAvailableNow().
+    //The service layer will calculate this value based on Dish.isAvailableNow().
     private boolean isAvailable;
 
 }

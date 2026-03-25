@@ -2,7 +2,7 @@ package io.github.j_yuhanwang.food_ordering_app.canteen.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
-import io.github.j_yuhanwang.food_ordering_app.menu.entity.Menu;
+import io.github.j_yuhanwang.food_ordering_app.dish.entity.Dish;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -14,8 +14,8 @@ import java.util.List;
  * Represents UCD Canteen.
  * <p>
  * This entity acts as the aggregate root for all food-related operations.
- * It manages its own lifecycle along with its Menus and Operating Schedules(daily and holiday schedules).
- * If a Canteen is deleted, all associated Menus and Schedules are strictly deleted.
+ * It manages its own lifecycle along with its Dishes and Operating Schedules(daily and holiday schedules).
+ * If a Canteen is deleted, all associated Dishes and Schedules are strictly deleted.
  *
  * @author BlairWang
  * @version 1.0
@@ -50,17 +50,17 @@ public class Canteen {
     private String imageUrl;
 
     /**
-     * The list of menus offered by this canteen.
+     * The list of dishes offered by this canteen.
      * <p>
-     * <b>Orphan Removal:</b> true (Removing a menu from this list deletes it from the database)
+     * <b>Orphan Removal:</b> true (Removing a dish from this list deletes it from the database)
      */
     @OneToMany(mappedBy = "canteen", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<Menu> menus = new ArrayList<>();
+    private List<Dish> dishes = new ArrayList<>();
 
     /**
      * The specific user account designated as the manager of this canteen.
-     * This user has permissions to update menus and schedules.
+     * This user has permissions to update dishes and schedules.
      */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id", referencedColumnName = "id", unique = true)

@@ -20,14 +20,14 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
      *            If it is, add the number, else add the whole info of that dish.
      *
      * @param orderId ID of the transaction.
-     * @param menuId ID of the dish.
+     * @param dishId ID of the dish.
      * @return true if the dish exists in the order, false otherwise.
      */
     @Query("SELECT CASE WHEN COUNT(oi) > 0 THEN true ELSE false END " +
             "FROM OrderItem oi " +
-            "WHERE oi.order.id = :orderId AND oi.menu.id = :menuId")
-    boolean existsByOrderIdAndMenuId(
+            "WHERE oi.order.id = :orderId AND oi.dish.id = :dishId")
+    boolean existsByOrderIdAndDishId(
             @Param("orderId") Long orderId,
-            @Param("menuId") Long menuId
+            @Param("dishId") Long dishId
     );
 }

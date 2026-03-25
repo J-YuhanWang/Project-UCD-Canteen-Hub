@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface CartItemRepository extends JpaRepository<CartItem,Long> {
 
     /**
-     * Checks if a specific menu item already exists in a specific cart.
+     * Checks if a specific dish item already exists in a specific cart.
      * Usage:
      * When a user adds a dish to the cart:
      * - If found: Update quantity (e.g., quantity + 1).
@@ -22,8 +22,8 @@ public interface CartItemRepository extends JpaRepository<CartItem,Long> {
      * This ensures no duplicate rows for the same dish (Unique Constraint).
      *
      * @param cartId The ID of the shopping cart.
-     * @param menuId The ID of the menu item.
+     * @param dishId The ID of the dish item.
      * @return Optional containing the item if found.
      */
-    Optional<CartItem> findByCartIdAndMenuId(Long cartId, Long menuId);
+    Optional<CartItem> findByCartIdAndDishId(Long cartId, Long dishId);
 }

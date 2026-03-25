@@ -1,6 +1,6 @@
 package io.github.j_yuhanwang.food_ordering_app.order.entity;
 
-import io.github.j_yuhanwang.food_ordering_app.menu.entity.Menu;
+import io.github.j_yuhanwang.food_ordering_app.dish.entity.Dish;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
  * <b>Key Concept: Price Snapshot</b>
  * <br>
  * This entity stores the price <i>at the moment of purchase</i>. Even if the
- * original {@link Menu} price changes later, this record remains unchanged
+ * original {@link Dish} price changes later, this record remains unchanged
  * to ensure historical financial accuracy.
  *
  * @author BlairWang
@@ -28,7 +28,7 @@ import java.math.BigDecimal;
 // Ensures that a specific dish appears only once in a single order (merged quantity)
 @Table(name = "order_items",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"order_id", "menu_id"})
+                @UniqueConstraint(columnNames = {"order_id", "dish_id"})
         }
 )
 @Data
@@ -43,9 +43,9 @@ public class OrderItem {
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "menu_id", nullable = false)
+    @JoinColumn(name = "dish_id", nullable = false)
     @ToString.Exclude
-    private Menu menu;
+    private Dish dish;
 
     /**
      * The number of items ordered.
@@ -56,7 +56,7 @@ public class OrderItem {
 
     /**
      * Price Snapshot: The price of a single unit at the time of order placement.
-     * This decouples the order history from future menu price changes.
+     * This decouples the order history from future dish price changes.
      */
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal pricePerUnit;
@@ -68,14 +68,14 @@ public class OrderItem {
     private BigDecimal subtotal;
 
     /**
-     * Snapshot of the menu name at the time of purchase.
-     * Prevents order history from changing if the menu item is renamed later.
+     * Snapshot of the dish name at the time of purchase.
+     * Prevents order history from changing if the dish item is renamed later.
      */
     @Column(nullable = false)
-    private String menuName;
+    private String dishName;
 
     /**
-     * Snapshot of the menu image URL at the time of purchase.
+     * Snapshot of the dish image URL at the time of purchase.
      */
-    private String menuImageUrl;
+    private String dishImageUrl;
 }

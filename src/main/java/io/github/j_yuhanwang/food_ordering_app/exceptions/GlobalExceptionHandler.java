@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
 
 
     /**
-     * Handle 404 Not Found: Triggered when a requested resource (User, Menu, Order) does not exist.
+     * Handle 404 Not Found: Triggered when a requested resource (User, Dish, Order) does not exist.
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Response<?>> handleResourceNotFound(ResourceNotFoundException ex){

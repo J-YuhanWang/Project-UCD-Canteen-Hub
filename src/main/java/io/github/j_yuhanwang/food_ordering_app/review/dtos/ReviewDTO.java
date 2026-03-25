@@ -37,10 +37,10 @@ public class ReviewDTO {
     private String userAvatarUrl;
 
 
-    //Flatted Menu Info
-    private Long menuId;
-    private String menuName;
-    private String menuImageUrl;
+    //Flatted Dish Info
+    private Long dishId;
+    private String dishName;
+    private String dishImageUrl;
 
     @NotNull(message = "Rating is required")
     @Min(value = 1, message = "Rating must be at least 1")

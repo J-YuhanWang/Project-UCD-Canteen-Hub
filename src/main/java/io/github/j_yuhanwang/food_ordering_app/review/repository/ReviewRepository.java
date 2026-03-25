@@ -18,18 +18,18 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
      * Finds all reviews for a specific dish, sorting them so the newest ones appear first.
      * (Assuming larger IDs = newer reviews).
      */
-    List<Review> findByMenuIdOrderByMenuIdDesc(Long menuId);
+    List<Review> findByDishIdOrderByDishIdDesc(Long dishId);
 
     /**
      * Calculates the average star rating (e.g., 4.5) for a specific dish directly in the database.
-     * Used for displaying the rating badge on the menu card.
+     * Used for displaying the rating badge on the dish card.
      */
     @Query("""
             SELECT AVG(r.rating)
             FROM Review r
-            WHERE r.menu.id = :menuId
+            WHERE r.dish.id = :dishId
             """)
-    Double calculateAverageRatingByMenuId(@Param("menuId") Long menuId);
+    Double calculateAverageRatingByDishId(@Param("dishId") Long dishId);
 
     /**
      * Prevents duplicate reviews.
@@ -39,8 +39,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END
             FROM Review r
             WHERE r.user.id = :userId AND
-                  r.menu.id=:menuId AND
+                  r.dish.id=:dishId AND
                   r.orderId=:orderId
             """)
-    boolean existsByUserIdAndMenuIdAndOrderId(@Param("userId") Long userId, @Param("menuId") Long menuId, @Param("orderId") Long orderId);
+    boolean existsByUserIdAndDishIdAndOrderId(@Param("userId") Long userId, @Param("dishId") Long dishId, @Param("orderId") Long orderId);
 }

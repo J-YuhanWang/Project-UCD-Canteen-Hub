@@ -1,4 +1,4 @@
-package io.github.j_yuhanwang.food_ordering_app.menu.dtos;
+package io.github.j_yuhanwang.food_ordering_app.dish.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,7 +27,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MenuDTO {
+public class DishDTO {
     private Long id;
 
     @NotBlank(message = "Dish name is required")
