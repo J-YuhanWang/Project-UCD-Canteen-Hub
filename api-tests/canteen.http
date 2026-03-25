@@ -1,0 +1,101 @@
+### 1. [POST] 2.1 addCanteen
+POST {{host}}/api/v1/canteens
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "name": "TEST_Pi_Coffee",
+  "canteenType": "CAFE",
+  "description": "A test canteen for smoke testing"
+}
+
+> {% client.global.set("canteen_id", response.body.data.id); %}
+
+
+### 2. [GET] getAllCanteens
+GET {{host}}/api/v1/canteens
+Authorization: Bearer {{admin_token}}
+
+
+### 3. [GET] getCanteenById & validate isOpen logic
+GET {{host}}/api/v1/canteens/{{canteen_id}}
+Authorization: Bearer {{admin_token}}
+
+
+### 4. [PUT] updateCanteenById
+PUT {{host}}/api/v1/canteens/{{canteen_id}}
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "description": "Updated description for testing"
+}
+
+
+### 5. [POST] uploadCanteenImage
+POST {{host}}/api/v1/canteens/{{canteen_id}}/image
+Authorization: Bearer {{admin_token}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="OIP.jpg"
+Content-Type: image/jpeg
+
+< ./OIP.jpg
+--WebAppBoundary--
+
+
+### 6. [PUT] assignManager
+PUT {{host}}/api/v1/canteens/{{canteen_id}}/manager/1
+Authorization: Bearer {{admin_token}}
+
+
+### 7. [PUT] updateWeeklySchedules & syncScheduleLogic
+PUT {{host}}/api/v1/canteens/{{canteen_id}}/schedules
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+[
+  {
+    "dayOfWeek": "MONDAY",
+    "openingTime": "09:00",
+    "closingTime": "17:00",
+    "closed": false
+  },
+  {
+    "dayOfWeek": "TUESDAY",
+    "openingTime": "09:00",
+    "closingTime": "17:00",
+    "closed": false
+  },
+  {
+    "dayOfWeek": "SUNDAY",
+    "closed": true
+  }
+]
+
+
+### 8. [POST] 3.1 addHolidaySchedule
+POST {{host}}/api/v1/canteens/{{canteen_id}}/holidays
+Content-Type: application/json
+Authorization: Bearer {{admin_token}}
+
+{
+  "specificDate": "2026-12-25",
+  "isClosed": true
+}
+
+> {% client.global.set("holiday_id", response.body.data.id); %}
+
+
+### 9. [DELETE] 3.2 removeHolidaySchedule
+DELETE {{host}}/api/v1/canteens/{{canteen_id}}/holidays/{{holiday_id}}
+Authorization: Bearer {{admin_token}}
+
+
+### 10. [DELETE] deactivateCanteen)
+DELETE {{host}}/api/v1/canteens/{{canteen_id}}
+Authorization: Bearer {{admin_token}}
+
+
+

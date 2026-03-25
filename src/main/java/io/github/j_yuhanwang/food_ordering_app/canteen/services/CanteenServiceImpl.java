@@ -189,7 +189,7 @@ public class CanteenServiceImpl implements CanteenService {
         );
 
         //3.Core business logic validation: Is the user already a manager at other restaurant?
-        canteenRepository.findByManagerAndDeletedIsFalse(manager).ifPresent(otherCanteen -> {
+        canteenRepository.findByManagerAndIsDeletedFalse(manager).ifPresent(otherCanteen -> {
             if (!otherCanteen.getId().equals(canteenId)) {
                 log.warn("Assign manager failed: User [{}] is already managing Canteen [{}]",
                         manager.getName(), otherCanteen.getName());

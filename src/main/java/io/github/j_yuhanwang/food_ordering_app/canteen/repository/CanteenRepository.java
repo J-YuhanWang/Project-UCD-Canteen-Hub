@@ -23,5 +23,5 @@ public interface CanteenRepository extends JpaRepository<Canteen,Long> {
 
     //Prepare for assignManager
     //SELECT * FROM canteens WHERE manager_id = ? AND is_deleted = false
-    Optional<Canteen> findByManagerAndDeletedIsFalse(User manager);
+    Optional<Canteen> findByManagerAndIsDeletedFalse(User manager);
 }
