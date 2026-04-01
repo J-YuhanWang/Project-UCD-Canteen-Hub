@@ -17,7 +17,7 @@ public interface CartItemMapper {
     @Mapping(source = "dish.id",target = "dishId")
     @Mapping(source = "dish.name",target = "dishName")
     @Mapping(source = "dish.imageUrl",target = "dishImageUrl")
-    @Mapping(target = "isAvailable",ignore = true)
+    @Mapping(source = "dish.available",target = "isAvailable")
     CartItemDTO toDTO(CartItem cartItem);
 
     /**
