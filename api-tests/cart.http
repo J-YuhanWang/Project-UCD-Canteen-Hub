@@ -1,0 +1,23 @@
+#### 2.get current cart
+GET {{host}}/api/v1/cart
+Authorization: Bearer {{user_token}}
+
+#### 1.add item to cart
+POST {{host}}/api/v1/cart/items/3?quantity=3
+Authorization: Bearer {{user_token}}
+
+#### 3.increment item
+PATCH {{host}}/api/v1/cart/items/4/increment
+Authorization: Bearer {{user_token}}
+
+#### 4.decrement item
+PATCH {{host}}/api/v1/cart/items/4/decrement
+Authorization: Bearer {{user_token}}
+
+#### 5.remove item
+DELETE {{host}}/api/v1/cart/items/4
+Authorization: Bearer {{user_token}}
+
+#### 6. clear cart
+DELETE {{host}}/api/v1/cart
+Authorization: Bearer {{user_token}}
