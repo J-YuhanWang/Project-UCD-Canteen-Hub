@@ -40,6 +40,8 @@ public class OrderDTO {
 
     private BigDecimal totalAmount;
 
+    private String pickupCode;
+
     private OrderStatus orderStatus;
 
     private PaymentStatus paymentStatus;

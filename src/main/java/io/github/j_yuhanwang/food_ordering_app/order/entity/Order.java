@@ -63,6 +63,9 @@ public class Order {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(length = 10)
+    private String pickupCode;
+
     /**
      * The fulfillment status of the order (e.g., INITIALIZED, CANCELLED, DELIVERED).
      */
