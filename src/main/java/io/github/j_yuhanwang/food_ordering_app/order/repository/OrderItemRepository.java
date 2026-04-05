@@ -15,10 +15,7 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     /**
      * Checks if a specific dish was part of a specific order.
      * * Usage:
-     * scenario1: a user wants to write a review for a dish, but the system needs to check whether he/she have ordered it before
-     * scenario2: a user wants to add a dish to the cart, the system needs to check whether he/she have ordered it before.
-     *            If it is, add the number, else add the whole info of that dish.
-     *
+     * a user wants to write a review for a dish, but the system needs to check whether he/she have ordered it before
      * @param orderId ID of the transaction.
      * @param dishId ID of the dish.
      * @return true if the dish exists in the order, false otherwise.

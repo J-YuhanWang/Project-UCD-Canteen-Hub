@@ -7,7 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -20,13 +23,8 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Retrieves the order history for a specific user.
-     * Ordering:
-     * Sorts by orderDate in descending order (newest orders first).
-     *
-     * @param user The user to find orders for.
-     * @return List of orders sorted by date.
      */
-    List<Order> findByUserOrderByOrderDateDesc(User user);
+    Page<Order> findByUserId(Long userId, Pageable pageable);
 
     /**
      * Retrieves orders filtered by status (e.g., PENDING, DELIVERED).
@@ -47,4 +45,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      */
     @Query("SELECT COUNT(DISTINCT o.user.id) FROM Order o")
     long countDistinctUsers();
+
+    List<Order> findByOrderStatusAndOrderDateBefore(OrderStatus orderStatus, LocalDateTime cutoffTime);
+
+    @Query("SELECT SUM(o.totalAmount) " +
+            "FROM Order AS o " +
+            "WHERE o.orderDate BETWEEN :startDate AND :endDate " +
+            "AND o.paymentStatus = 'PAID'")
+    BigDecimal calculateRevenueByDateRange(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }
