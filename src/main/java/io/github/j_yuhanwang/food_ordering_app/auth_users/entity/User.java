@@ -124,4 +124,18 @@ public class User {
     @ToString.Exclude
     private List<Payment> payments = new ArrayList<>();
 
+    public boolean hasRole(String roleName){
+        if(this.roles == null || this.roles.isEmpty()){
+            return false;
+        }
+        return this.getRoles().stream()
+                .anyMatch(role->role.getName().equals(roleName));
+    }
+    public boolean isAdmin(){
+        return hasRole("ROLE_ADMIN");
+    }
+    public boolean isManager() {
+        return hasRole("ROLE_MANAGER");
+    }
+
 }
