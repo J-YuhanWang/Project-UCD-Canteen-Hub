@@ -3,8 +3,10 @@ package io.github.j_yuhanwang.food_ordering_app.order.repository;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
 import io.github.j_yuhanwang.food_ordering_app.enums.OrderStatus;
 import io.github.j_yuhanwang.food_ordering_app.order.entity.Order;
+import io.github.j_yuhanwang.food_ordering_app.order.services.OrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +26,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     /**
      * Retrieves the order history for a specific user.
      */
+    @EntityGraph(attributePaths = {"orderItems"})
     Page<Order> findByUserId(Long userId, Pageable pageable);
 
     /**
@@ -35,8 +38,14 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
      * @param pageable Pagination info (page number, size).
      * @return A page of matching orders.
      */
+    @EntityGraph(attributePaths = {"orderItems"})
     Page<Order> findByOrderStatus(OrderStatus orderStatus, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"orderItems"})
+    Page<Order> findByCanteenId(Long canteenId, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"orderItems"})
+    Page<Order> findByCanteenIdAndOrderStatus(Long canteenId, OrderStatus orderStatus,Pageable pageable);
     /**
      * Calculates the number of unique customers who have placed an order.
      * Used for admin dashboard analytics.
