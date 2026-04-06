@@ -2,12 +2,10 @@ package io.github.j_yuhanwang.food_ordering_app.order.services;
 
 import io.github.j_yuhanwang.food_ordering_app.enums.OrderStatus;
 import io.github.j_yuhanwang.food_ordering_app.order.dtos.OrderDTO;
-import io.github.j_yuhanwang.food_ordering_app.order.dtos.OrderItemDTO;
 import org.springframework.data.domain.Page;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * @author YuhanWang
@@ -33,6 +31,7 @@ public interface OrderService {
     void cancelUnpaidOrders();
     //user cancel the order actively
     void cancelOrder(Long orderId);
+
 
     //4. the aggregate information
     long countUniqueCustomers();
