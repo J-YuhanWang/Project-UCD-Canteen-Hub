@@ -5,7 +5,6 @@ import io.github.j_yuhanwang.food_ordering_app.auth_users.services.UserService;
 import io.github.j_yuhanwang.food_ordering_app.cart.dtos.CartDTO;
 import io.github.j_yuhanwang.food_ordering_app.cart.entity.Cart;
 import io.github.j_yuhanwang.food_ordering_app.cart.entity.CartItem;
-import io.github.j_yuhanwang.food_ordering_app.cart.mapper.CartItemMapper;
 import io.github.j_yuhanwang.food_ordering_app.cart.mapper.CartMapper;
 import io.github.j_yuhanwang.food_ordering_app.cart.repository.CartItemRepository;
 import io.github.j_yuhanwang.food_ordering_app.cart.repository.CartRepository;
@@ -45,13 +44,13 @@ public class CartServiceImpl implements CartService {
 
         //2. fetch dish by dish id, check whether dish.isAvailable=true
         Dish dish = dishRepository.findById(dishId).orElseThrow(
-                ()->new ResourceNotFoundException("Dish","id",dishId)
+                () -> new ResourceNotFoundException("Dish", "id", dishId)
         );
-        if(!dish.isAvailable()){
+        if (!dish.isAvailable()) {
             throw new BadRequestException("The dish is currently unavailable. It cannot be added to the cart.");
         }
         //3. Cart Discovery, find cart from user, if user does not have cart, new cart()
-        Cart cart = cartRepository.findByUserId(user.getId()).orElseGet(()->{
+        Cart cart = cartRepository.findByUserId(user.getId()).orElseGet(() -> {
             log.info("No active cart found for user {}, creating a new one.", user.getEmail());
             Cart newCart = Cart.builder()
                     .user(user)
@@ -62,25 +61,25 @@ public class CartServiceImpl implements CartService {
 
         //4. Cross-store Guard: match the canteen, if matched add the quantity, else throw exception
         //if cart items exist, check whether the dish canteen matches current user's cart canteen
-        if(!cart.getCartItems().isEmpty()){
+        if (!cart.getCartItems().isEmpty()) {
             Long currentCartCanteenId = cart.getCartItems().getFirst().getDish().getCanteen().getId();
             Long addedDishCanteenId = dish.getCanteen().getId();
-            if(!currentCartCanteenId.equals(addedDishCanteenId)){
+            if (!currentCartCanteenId.equals(addedDishCanteenId)) {
                 throw new BadRequestException("You can only add dishes from the same canteen.");
             }
         }
         //5. check whether the added dish exists, if exists then add the quantity, else add the dish to the cart
         Optional<CartItem> existingItem = cart.getCartItems().stream()
-                .filter(item->item.getDish().getId().equals(dish.getId()))
+                .filter(item -> item.getDish().getId().equals(dish.getId()))
                 .findFirst();
 
-        if(existingItem.isPresent()){
+        if (existingItem.isPresent()) {
             CartItem item = existingItem.get();
             //add item quantity
-            item.setQuantity(item.getQuantity()+quantity);
+            item.setQuantity(item.getQuantity() + quantity);
             item.setSubtotal(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
             log.info("Updated existing CartItem, new quantity: {}", item.getQuantity());
-        }else{
+        } else {
             //the item does not exist
             CartItem cartItem = CartItem.builder()
                     .cart(cart)
@@ -95,7 +94,7 @@ public class CartServiceImpl implements CartService {
         //6.persistence
         Cart savedCart = cartRepository.save(cart);
         CartDTO dto = cartMapper.toDTO(savedCart);
-        enrichCartDTO(dto,savedCart);
+        enrichCartDTO(dto, savedCart);
         return dto;
     }
 
@@ -106,12 +105,12 @@ public class CartServiceImpl implements CartService {
         CartItem item = getValidCartItemForCurrentUser(cartItemId);
         Cart cart = item.getCart();
 
-        item.setQuantity(item.getQuantity()+1);
+        item.setQuantity(item.getQuantity() + 1);
         item.setSubtotal(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
 
         Cart savedCart = cartRepository.save(cart);
         CartDTO dto = cartMapper.toDTO(savedCart);
-        enrichCartDTO(dto,savedCart);
+        enrichCartDTO(dto, savedCart);
         return dto;
     }
 
@@ -122,22 +121,22 @@ public class CartServiceImpl implements CartService {
         CartItem item = getValidCartItemForCurrentUser(cartItemId);
         Cart cart = item.getCart();
 
-        if(item.getQuantity()>1){
-            item.setQuantity(item.getQuantity()-1);
+        if (item.getQuantity() > 1) {
+            item.setQuantity(item.getQuantity() - 1);
             item.setSubtotal(item.getPricePerUnit().multiply(BigDecimal.valueOf(item.getQuantity())));
 
-        }else{
+        } else {
             cart.getCartItems().remove(item);
         }
         Cart savedCart = cartRepository.save(cart);
         CartDTO dto = cartMapper.toDTO(savedCart);
-        enrichCartDTO(dto,savedCart);
+        enrichCartDTO(dto, savedCart);
         return dto;
     }
 
     @Override
     public void removeCartItem(Long cartItemId) {
-        log.info("Attempting to remove from cart for the cartItem {}",cartItemId);
+        log.info("Attempting to remove from cart for the cartItem {}", cartItemId);
 
         CartItem item = getValidCartItemForCurrentUser(cartItemId);
         Cart cart = item.getCart();
@@ -155,7 +154,7 @@ public class CartServiceImpl implements CartService {
         log.info("Attempting to get the shopping cart for the current user");
         User user = userService.getCurrentLoggedInUser();
         Optional<Cart> optionalCart = cartRepository.findByUserId(user.getId());
-        if(optionalCart.isEmpty()){
+        if (optionalCart.isEmpty()) {
             log.info("User {} does not have an active cart. Returning empty cart DTO.", user.getId());
             return CartDTO.builder()
                     .userId(user.getId())
@@ -167,7 +166,7 @@ public class CartServiceImpl implements CartService {
 
         Cart cart = optionalCart.get();
         CartDTO dto = cartMapper.toDTO(cart);
-        enrichCartDTO(dto,cart);
+        enrichCartDTO(dto, cart);
         return dto;
     }
 
@@ -181,13 +180,15 @@ public class CartServiceImpl implements CartService {
         });
     }
 
-    private CartItem getValidCartItemForCurrentUser(Long cartItemId){
+
+    //----helper methods----
+    private CartItem getValidCartItemForCurrentUser(Long cartItemId) {
         User user = userService.getCurrentLoggedInUser();
         CartItem item = cartItemRepository.findById(cartItemId).orElseThrow(
-                ()->new ResourceNotFoundException("CartItem","id",cartItemId)
+                () -> new ResourceNotFoundException("CartItem", "id", cartItemId)
         );
 
-        if(!item.getCart().getUser().getId().equals(user.getId())){
+        if (!item.getCart().getUser().getId().equals(user.getId())) {
             throw new BadRequestException("You do not have the permission to modify the cart item.");
         }
         return item;
@@ -196,7 +197,7 @@ public class CartServiceImpl implements CartService {
 
     private void enrichCartDTO(CartDTO dto, Cart savedCart) {
         //pruning
-        if(savedCart.getCartItems()==null || savedCart.getCartItems().isEmpty()){
+        if (savedCart.getCartItems() == null || savedCart.getCartItems().isEmpty()) {
             dto.setTotalPrice(BigDecimal.ZERO);
             dto.setTotalQuantity(0);
             return;
@@ -210,7 +211,7 @@ public class CartServiceImpl implements CartService {
         BigDecimal total = savedCart.getCartItems().stream()
 //                .map(item->item.getSubtotal())
                 .map(CartItem::getSubtotal)
-                .reduce(BigDecimal.ZERO,BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         //calculate the total quantity
         int quantity = savedCart.getCartItems().stream()
@@ -221,7 +222,7 @@ public class CartServiceImpl implements CartService {
         dto.setTotalQuantity(quantity);
 
         Dish dish = savedCart.getCartItems().getFirst().getDish();
-        if(dish != null && dish.getCanteen()!=null){
+        if (dish != null && dish.getCanteen() != null) {
             dto.setCanteenId(dish.getCanteen().getId());
             dto.setCanteenName(dish.getCanteen().getName());
         }

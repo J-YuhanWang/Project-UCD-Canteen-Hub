@@ -2,6 +2,8 @@ package io.github.j_yuhanwang.food_ordering_app.order.services;
 
 import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
 import io.github.j_yuhanwang.food_ordering_app.auth_users.services.UserService;
+import io.github.j_yuhanwang.food_ordering_app.canteen.entity.Canteen;
+import io.github.j_yuhanwang.food_ordering_app.canteen.repository.CanteenRepository;
 import io.github.j_yuhanwang.food_ordering_app.cart.entity.Cart;
 import io.github.j_yuhanwang.food_ordering_app.cart.entity.CartItem;
 import io.github.j_yuhanwang.food_ordering_app.cart.repository.CartRepository;
@@ -19,9 +21,13 @@ import io.github.j_yuhanwang.food_ordering_app.order.mapper.OrderItemMapper;
 import io.github.j_yuhanwang.food_ordering_app.order.mapper.OrderMapper;
 import io.github.j_yuhanwang.food_ordering_app.order.repository.OrderItemRepository;
 import io.github.j_yuhanwang.food_ordering_app.order.repository.OrderRepository;
+import io.github.j_yuhanwang.food_ordering_app.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemMapper orderItemMapper;
     private final UserService userService;
     private final CartRepository cartRepository;
+    private final CanteenRepository canteenRepository;
 
     //1.create the order from the user's cart(core logic)
     @Override
@@ -108,6 +115,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     //2.Query methods
+    //2.1 users themselves/admin/valid manager can query the specific order
     @Override
     public OrderDTO getOrderById(Long orderId) {
         log.info("Attempting to get order information by order ID:{}",orderId);
@@ -117,28 +125,73 @@ public class OrderServiceImpl implements OrderService {
         //authentication
         User currentUser = userService.getCurrentLoggedInUser();
         boolean isOwner = currentUser.getId().equals(order.getUser().getId());
-        boolean isManagerOrAdmin = currentUser.isAdmin() || currentUser.isManager();
-        if(!isOwner && !isManagerOrAdmin){
+        boolean isValidManager = currentUser.isManager() &&
+                order.getCanteen().getManager().getId().equals(currentUser.getId());
+        //
+        if(!isOwner && !currentUser.isAdmin() && !isValidManager){
             throw new BadRequestException("You are not authorized to view this order.");
         }
 
         return orderMapper.toDTO(order);
     }
 
-    @Override
-    public OrderItemDTO getOrderItemById(Long orderItemId) {
-        return null;
-    }
-
-    @Override
-    public Page<OrderDTO> getAllOrders(OrderStatus orderStatus, int page, int size) {
-        return null;
-    }
-
+    //2.2 user themselves can query their own orders
     @Override
     public Page<OrderDTO> getOrdersOfUser(int page, int size) {
-        return null;
+        log.info("User attempting to fetch their own orders");
+        User user = userService.getCurrentLoggedInUser();
+        Pageable pageable = PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"id"));
+        Page<Order> orderPage = orderRepository.findByUserId(user.getId(),pageable);
+        return orderPage.map(orderMapper::toDTO);
     }
+
+    //2.3 manager and admin can query the specific canteen's orders
+    @Override
+    public Page<OrderDTO> getOrdersByCanteenId(Long canteenId, OrderStatus status, int page, int size) {
+        log.info("Manager attempting to fetch orders for Canteen ID: {}", canteenId);
+        Canteen canteen = canteenRepository.findByIdAndIsDeletedFalse(canteenId).orElseThrow(
+                ()->new ResourceNotFoundException("Canteen","canteenId",canteenId)
+        );
+        //authentication
+        boolean isValidManager = canteen.getManager().getEmail().equals(SecurityUtils.getCurrentUserEmail());
+        boolean isAdmin = SecurityUtils.isAdmin();
+        if(!isValidManager && !isAdmin){
+            throw new BadRequestException("You are not authorized to view this canteen's orders.");
+        }
+
+        //fetch the orders
+        Pageable pageable = PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"id"));
+        Page<Order> orderPage;
+        if(status!=null){
+            orderPage = orderRepository.findByCanteenIdAndOrderStatus(canteenId,status,pageable);
+        }else{
+            orderPage = orderRepository.findByCanteenId(canteenId,pageable);
+        }
+
+        return orderPage.map(orderMapper::toDTO);
+    }
+
+    //2.4 only the administrators can query all orders
+    @Override
+    public Page<OrderDTO> getAllOrders(OrderStatus orderStatus, int page, int size) {
+        log.info("Administrator attempting to fetch all orders for {}", orderStatus);
+        if(!SecurityUtils.isAdmin()){
+            throw new BadRequestException("You are not authorized to view all orders");
+        }
+        Pageable pageable = PageRequest.of(page,size,Sort.by(Sort.Direction.DESC, "id"));
+        Page<Order> orderPage;
+        if(orderStatus!=null){
+            orderPage = orderRepository.findByOrderStatus(orderStatus,pageable);
+        }else{
+            orderPage = orderRepository.findAll(pageable);
+        }
+//        Page<OrderDTO> orderDTOPage=orderPage.map(order->{
+//            return orderMapper.toDTO(order);
+//        });
+
+        return orderPage.map(orderMapper::toDTO);
+    }
+
 
 
     @Override
@@ -151,6 +204,7 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
+    //cancel order by user actively
     @Override
     public void cancelOrder(Long orderId) {
 

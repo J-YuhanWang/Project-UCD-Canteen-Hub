@@ -18,10 +18,14 @@ public interface OrderService {
     OrderDTO placeOrderFromCart();
 
     //2. Query methods
+    //2.1 users themselves/admin/valid manager can query the specific order
     OrderDTO getOrderById(Long orderId);
-    OrderItemDTO getOrderItemById(Long orderItemId);
-    Page<OrderDTO> getAllOrders(OrderStatus orderStatus, int page, int size);
+    //2.2 user themselves can query their own orders
     Page<OrderDTO> getOrdersOfUser(int page,int size);
+    //2.3 manager can query the specific canteen's orders
+    Page<OrderDTO> getOrdersByCanteenId(Long canteenId, OrderStatus status, int page, int size);
+    //2.4 only the administrators can query all orders
+    Page<OrderDTO> getAllOrders(OrderStatus orderStatus, int page, int size);
 
     //3.change the status
     OrderDTO updateOrderStatus(Long orderId,OrderStatus status);
