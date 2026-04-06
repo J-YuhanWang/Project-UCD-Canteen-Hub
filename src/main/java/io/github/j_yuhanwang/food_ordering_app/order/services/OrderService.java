@@ -29,13 +29,13 @@ public interface OrderService {
 
     //3.change the status
     OrderDTO updateOrderStatus(Long orderId,OrderStatus status);
-    //Timed scanning method(for 5 minutes, do not convey to frontend)
+    //Timed scanning method (waiting for 15 minutes, do not convey to frontend)
     void cancelUnpaidOrders();
-    //user cancel the order
+    //user cancel the order actively
     void cancelOrder(Long orderId);
 
     //4. the aggregate information
-    int countUniqueCustomers();
+    long countUniqueCustomers();
     BigDecimal getRevenueByDateRange(LocalDateTime startDate, LocalDateTime endDate);
 
 }

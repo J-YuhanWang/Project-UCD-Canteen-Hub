@@ -137,5 +137,8 @@ public class User {
     public boolean isManager() {
         return hasRole("ROLE_MANAGER");
     }
+    public boolean isStudent() {
+        return hasRole("ROLE_STUDENT");
+    }
 
 }

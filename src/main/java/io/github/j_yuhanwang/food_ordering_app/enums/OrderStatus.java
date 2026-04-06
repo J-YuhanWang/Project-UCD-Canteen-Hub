@@ -6,9 +6,9 @@ package io.github.j_yuhanwang.food_ordering_app.enums;/*
 
 public enum OrderStatus {
     INITIALIZED,
-    CONFIRMED,
-    ON_THE_WAY,
-    DELIVERED,
+    CONFIRMED, //Payment completed, canteen is preparing.
+    READY_FOR_PICKUP, //waiting for students/users to pickup
+    COMPLETED, //finished
     CANCELLED,
     FAILED
 }
