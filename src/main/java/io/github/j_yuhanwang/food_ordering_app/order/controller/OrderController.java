@@ -97,8 +97,4 @@ public class OrderController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate){
         return Response.ok(orderService.getRevenueByDateRange(startDate, endDate));
     }
-
-
-
-
 }

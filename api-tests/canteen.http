@@ -46,7 +46,7 @@ Content-Type: image/jpeg
 
 
 ### 6. [PUT] assignManager
-PUT {{host}}/api/v1/canteens/{{canteen_id}}/manager/1
+PUT {{host}}/api/v1/canteens/{{canteen_id}}/manager/3
 Authorization: Bearer {{admin_token}}
 
 

@@ -70,6 +70,7 @@ public class Order {
      * The fulfillment status of the order (e.g., INITIALIZED, CANCELLED, DELIVERED).
      */
     @Enumerated(EnumType.STRING)
+    @Column(name = "order_status", nullable = false, length = 50)
     private OrderStatus orderStatus;
 
     /**

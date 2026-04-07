@@ -3,7 +3,7 @@ GET {{host}}/api/v1/cart
 Authorization: Bearer {{user_token}}
 
 #### 1.add item to cart
-POST {{host}}/api/v1/cart/items/3?quantity=3
+POST {{host}}/api/v1/cart/items/3?quantity=2
 Authorization: Bearer {{user_token}}
 
 #### 3.increment item

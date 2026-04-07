@@ -1,0 +1,58 @@
+### Module 1：Student
+### 1.1 Student: Placing an order from the shopping cart
+### Prerequisite: The student's shopping cart must contain items in the database.
+POST {{host}}/api/v1/orders
+Authorization: Bearer {{user_token}}
+Content-Type: application/json
+
+//Extract the generated orderId and store it in a global variable for use by downstream interfaces.
+> {%
+    if (response.status === 200 || response.status === 201) {
+        client.global.set("dynamic_order_id", response.body.data.id);
+    }
+%}
+
+### 1.2 Student: View all my orders (paginated)
+GET {{host}}/api/v1/orders/my-orders?page=0&size=5
+Authorization: Bearer {{user_token}}
+
+### 1.3 Student: Query the order was just generated
+GET {{host}}/api/v1/orders/{{dynamic_order_id}}
+Authorization: Bearer {{user_token}}
+
+
+### Module 2: Manager
+### 2.1 Query all orders for this canteen
+GET {{host}}/api/v1/orders/canteens/{{canteen_id}}?page=0&size=10
+Authorization: Bearer {{manager_token}}
+
+### 2.2 Update the order status from INITIALIZED to CONFIRMED
+PUT {{host}}/api/v1/orders/{{dynamic_order_id}}/status?status=CONFIRMED
+Authorization: Bearer {{manager_token}}
+
+### 2.3 Update the order status from CONFIRMED to READY_FOR_PICKUP
+PUT {{host}}/api/v1/orders/{{dynamic_order_id}}/status?status=READY_FOR_PICKUP
+Authorization: Bearer {{manager_token}}
+
+### Module 3：Student - unauthorized operations
+### 3.1 Interception test: The student attempts to change the status to COMPLETED (Expected: 400 Bad Request)
+PUT {{host}}/api/v1/orders/{{dynamic_order_id}}/status?status=COMPLETED
+Authorization: Bearer {{user_token}}
+
+### 3.2 Attempting to cancel an order that has already been prepared
+### (READY_FOR_PICKUP-> CANCELLED) Expected: Error, because the status is no longer INITIALIZED)
+PUT {{host}}/api/v1/orders/{{dynamic_order_id}}/status?status=CANCELLED
+Authorization: Bearer {{user_token}}
+
+### Module 4: Admin:Global Management and Statistics
+### 4.1 Admin: Query all orders
+GET {{host}}/api/v1/orders/all?page=0&size=10
+Authorization: Bearer {{admin_token}}
+
+### 4.2 Admin: Query the number of unique users placing orders
+GET {{host}}/api/v1/orders/admin/stats/customers/count
+Authorization: Bearer {{admin_token}}
+
+### 4.3 Admin: Query revenue for a specified time period (note the ISO format of the time)
+GET {{host}}/api/v1/orders/admin/stats/revenue?startDate=2026-04-01T00:00:00&endDate=2026-04-30T23:59:59
+Authorization: Bearer {{admin_token}}
