@@ -54,5 +54,5 @@ public class ReviewDTO {
     private Long orderId;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 }

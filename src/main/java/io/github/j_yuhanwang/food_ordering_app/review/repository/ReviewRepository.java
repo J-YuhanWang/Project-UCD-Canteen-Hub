@@ -1,6 +1,8 @@
 package io.github.j_yuhanwang.food_ordering_app.review.repository;
 
 import io.github.j_yuhanwang.food_ordering_app.review.entity.Review;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,10 +18,10 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     /**
      * Finds all reviews for a specific dish, sorting them so the newest ones appear first.
-     * (Assuming larger IDs = newer reviews).
      */
-    List<Review> findByDishIdOrderByDishIdDesc(Long dishId);
+    Page<Review> findByDishIdOrderByCreatedAtDesc(Long dishId, Pageable pageable);
 
+    Page<Review> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
     /**
      * Calculates the average star rating (e.g., 4.5) for a specific dish directly in the database.
      * Used for displaying the rating badge on the dish card.
