@@ -34,6 +34,10 @@ Authorization: Bearer {{manager_token}}
 PUT {{host}}/api/v1/orders/{{dynamic_order_id}}/status?status=READY_FOR_PICKUP
 Authorization: Bearer {{manager_token}}
 
+### 2.4 Update the order status from READY_FOR_PICKUP to COMPLETED
+PUT {{host}}/api/v1/orders/3/status?status=COMPLETED
+Authorization: Bearer {{manager_token}}
+
 ### Module 3：Student - unauthorized operations
 ### 3.1 Interception test: The student attempts to change the status to COMPLETED (Expected: 400 Bad Request)
 PUT {{host}}/api/v1/orders/{{dynamic_order_id}}/status?status=COMPLETED

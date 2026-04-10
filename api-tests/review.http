@@ -1,0 +1,29 @@
+@dynamic_order_id=3
+@dynamic_dish_id=3
+
+#### 1.create the review
+POST {{host}}/api/v1/reviews
+Authorization: Bearer {{user_token}}
+Content-Type: application/json
+
+{
+  "orderId": {{dynamic_order_id}},
+  "dishId": {{dynamic_dish_id}},
+  "rating": 5,
+  "comment": "The UCD Canteen's pizza is amazing! Highly recommended."
+}
+
+#### 2.query the reviews
+GET {{host}}/api/v1/reviews/dish/{{dynamic_dish_id}}
+Authorization: Bearer {{user_token}}
+
+#### 3.query my reviews  - happy path
+GET {{host}}/api/v1/reviews/me
+Authorization: Bearer {{user_token}}
+
+#### 3.query my reviews  - sad path
+GET {{host}}/api/v1/reviews/me
+Authorization: Bearer {{manager_token}}
+
+#### 4.get average rating
+GET {{host}}/api/v1/reviews/dish/{{dynamic_dish_id}}/rating

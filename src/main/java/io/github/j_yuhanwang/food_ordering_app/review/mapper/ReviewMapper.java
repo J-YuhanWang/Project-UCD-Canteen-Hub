@@ -14,7 +14,7 @@ import org.mapstruct.ReportingPolicy;
 public interface ReviewMapper {
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "user.name", target = "userName")
-    @Mapping(source = "user.avatarUrl", target = "userAvatarUrl")
+    @Mapping(source = "user.profileUrl", target = "userAvatarUrl")
     @Mapping(source = "dish.id", target = "dishId")
     @Mapping(source = "dish.name", target = "dishName")
     @Mapping(source = "dish.imageUrl", target = "dishImageUrl")
@@ -22,7 +22,6 @@ public interface ReviewMapper {
 
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "dish", ignore = true)
-    @Mapping(source = "createAt", target = "createdAt")
     Review toEntity(ReviewDTO reviewDTO);
 
 }
