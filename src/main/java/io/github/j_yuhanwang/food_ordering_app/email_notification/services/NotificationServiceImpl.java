@@ -4,6 +4,7 @@ import io.github.j_yuhanwang.food_ordering_app.email_notification.dtos.Notificat
 import io.github.j_yuhanwang.food_ordering_app.email_notification.entity.Notification;
 import io.github.j_yuhanwang.food_ordering_app.email_notification.repository.NotificationRepository;
 import io.github.j_yuhanwang.food_ordering_app.exceptions.EmailDeliveryException;
+import io.github.j_yuhanwang.food_ordering_app.order.dtos.OrderDTO;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.nio.charset.StandardCharsets;
 
@@ -24,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 public class NotificationServiceImpl implements NotificationService{
     private final JavaMailSender javaMailSender;
     private final NotificationRepository notificationRepository;
+
+    private final TemplateEngine templateEngine;
 
     @Async
     @Override
@@ -57,4 +62,14 @@ public class NotificationServiceImpl implements NotificationService{
             throw new EmailDeliveryException("Failed to send notification email to " + notificationDTO.getRecipient());
         }
     }
+
+//    @Async
+//    public void sendOrderConfirmation(OrderDTO orderDTO){
+//        log.info("Preparing order confirmation email for order: {}", orderDTO.getId());
+//        Context context = new Context();
+//        context.setVariable("customerName",orderDTO.getUserName());
+//        context.setVariable("orderId",orderDTO.getId());
+//        context.setVariable("orderDate",orderDTO.getOrderDate());
+//        context.setVariable("orderId",orderDTO.getId());
+//    }
 }

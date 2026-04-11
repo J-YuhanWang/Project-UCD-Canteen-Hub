@@ -59,7 +59,7 @@ public class PaymentDTO {
 
     //The time when the payment intent was first created.
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createdTime;
+    private LocalDateTime createdAt;
 
 
 
