@@ -12,5 +12,6 @@ public interface PaymentService {
     String createCheckoutSession(Long orderId) throws StripeException;
     void processStripeWebhook(String payload, String signature);
     Page<PaymentDTO> getAllPayments(int page, int size);
+    Page<PaymentDTO> getPaymentsByUserId(int page,int size,Long userId);
     PaymentDTO getPaymentByOrderId(Long orderId);
 }
