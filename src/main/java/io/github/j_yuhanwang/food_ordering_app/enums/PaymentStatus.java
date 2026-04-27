@@ -6,7 +6,6 @@ package io.github.j_yuhanwang.food_ordering_app.enums;/*
 
 public enum PaymentStatus {
     PENDING,
-    PROCESSING,
     COMPLETED,
     FAILED,
     REFUNDED
