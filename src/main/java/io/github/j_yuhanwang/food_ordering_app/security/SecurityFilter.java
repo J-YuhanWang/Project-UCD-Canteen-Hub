@@ -41,7 +41,8 @@ public class SecurityFilter {
                         .requestMatchers(HttpMethod.GET,
                                  "/api/v1/canteens/**",
                                 "/api/v1/dishes/**",
-                                "/api/v1/reviews/**"
+                                "/api/v1/reviews/**",
+                                "/api/v1/payments/webhook"
                                 ).permitAll()
 //                        .requestMatchers("/api/test/**","/api/roles/**")
 //                                .permitAll()
