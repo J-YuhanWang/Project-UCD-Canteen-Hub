@@ -18,7 +18,7 @@ public class DataInitializer {
     @Bean
     public CommandLineRunner initRoles(RoleRepository roleRepository) {
         return args -> {
-            // 如果 role 表是空的，我们就自动塞入默认角色
+            // if role==null，set the default role
             if (roleRepository.count() == 0) {
                 Role studentRole = Role.builder().name("ROLE_STUDENT").build();
                 Role managerRole = Role.builder().name("ROLE_MANAGER").build();

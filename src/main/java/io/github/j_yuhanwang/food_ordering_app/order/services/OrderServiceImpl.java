@@ -142,7 +142,7 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderDTO> getOrdersOfUser(int page, int size) {
         log.info("User attempting to fetch their own orders");
         User user = userService.getCurrentLoggedInUser();
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Pageable pageable = createPageRequest(page,size);
         Page<Order> orderPage = orderRepository.findByUserId(user.getId(), pageable);
         return orderPage.map(orderMapper::toDTO);
     }
@@ -163,7 +163,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         //fetch the orders
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Pageable pageable = createPageRequest(page,size);
         Page<Order> orderPage;
         if (status != null) {
             orderPage = orderRepository.findByCanteenIdAndOrderStatus(canteenId, status, pageable);
@@ -182,7 +182,7 @@ public class OrderServiceImpl implements OrderService {
         if (!SecurityUtils.isAdmin()) {
             throw new BadRequestException("You are not authorized to view all orders");
         }
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Pageable pageable = createPageRequest(page,size);
         Page<Order> orderPage;
         if (orderStatus != null) {
             orderPage = orderRepository.findByOrderStatus(orderStatus, pageable);
@@ -350,5 +350,14 @@ public class OrderServiceImpl implements OrderService {
         log.info("Attempting to get the revenue by date range from {} to {}", startDate, endDate);
         BigDecimal revenue = orderRepository.calculateRevenueByDateRange(startDate, endDate);
         return revenue != null ? revenue : BigDecimal.ZERO;
+    }
+
+    // Standardize parameters and sort them in descending order by ID (newest first) by default.
+    private Pageable createPageRequest(int page, int size) {
+        return PageRequest.of(
+                Math.max(0, page),
+                Math.max(1, Math.min(size, 100)),
+                Sort.by(Sort.Direction.DESC, "id")
+        );
     }
 }

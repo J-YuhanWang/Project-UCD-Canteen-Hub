@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,7 +96,7 @@ public class ReviewServiceImpl implements ReviewService{
         Dish dish = dishRepository.findById(dishId).orElseThrow(
                 ()->new ResourceNotFoundException("Dish","dish",dishId)
         );
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = createPageRequest(page,size);
         Page<Review> reviews=reviewRepository.findByDishIdOrderByCreatedAtDesc(dishId,pageable);
         return reviews.map(reviewMapper::toDTO);
     }
@@ -105,7 +106,7 @@ public class ReviewServiceImpl implements ReviewService{
         User user = userService.getCurrentLoggedInUser();
         log.info("Fetching paginated reviews for user ID: {}", user.getId());
 
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = createPageRequest(page,size);
         Page<Review> reviews = reviewRepository.findByUserIdOrderByCreatedAtDesc(user.getId(),pageable);
 
         return reviews.map(reviewMapper::toDTO);
@@ -121,5 +122,13 @@ public class ReviewServiceImpl implements ReviewService{
         Double avgRating = reviewRepository.calculateAverageRatingByDishId(dishId);
 
         return avgRating != null? avgRating: 0.0;
+    }
+
+    private Pageable createPageRequest(int page, int size) {
+        return PageRequest.of(
+                Math.max(0, page),
+                Math.max(1, Math.min(size, 100)),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
     }
 }
