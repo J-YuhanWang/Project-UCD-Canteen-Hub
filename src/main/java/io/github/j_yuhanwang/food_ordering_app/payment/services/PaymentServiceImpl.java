@@ -8,6 +8,10 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
+import io.github.j_yuhanwang.food_ordering_app.auth_users.entity.User;
+import io.github.j_yuhanwang.food_ordering_app.auth_users.services.UserService;
+import io.github.j_yuhanwang.food_ordering_app.canteen.entity.Canteen;
+import io.github.j_yuhanwang.food_ordering_app.canteen.repository.CanteenRepository;
 import io.github.j_yuhanwang.food_ordering_app.enums.OrderStatus;
 import io.github.j_yuhanwang.food_ordering_app.enums.PaymentGateway;
 import io.github.j_yuhanwang.food_ordering_app.enums.PaymentStatus;
@@ -27,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +51,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final OrderService orderService;
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
+    private final UserService userService;
+    private final CanteenRepository canteenRepository;
 
     @Value("${stripe.api.secret.key}")
     private String secretKey; //key to create checkout session
@@ -263,28 +270,89 @@ public class PaymentServiceImpl implements PaymentService {
         log.warn("Payment {} and Order {} marked as FAILED. Reason: {}", paymentId, orderId, reason);
     }
 
+    //Get all payments for ADMIN
     @Override
     public Page<PaymentDTO> getAllPayments(int page, int size) {
         log.info("Admin attempting to get all payments in system");
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = createPageRequest(page, size);
         Page<Payment> payments = paymentRepository.findAll(pageable);
         return payments.map(paymentMapper::toDTO);
     }
 
+    //Get specific canteen payments for ADMIN/canteen's manager
     @Override
-    public Page<PaymentDTO> getPaymentsByUserId(int page, int size, Long userId) {
-        log.info("Attempting to get payments for userId: {}", userId);
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Payment> payments = paymentRepository.findByUserId(userId, pageable);
+    public Page<PaymentDTO> getPaymentsByCanteenId(int page, int size, Long canteenId) {
+        log.info("Attempting to get payments for canteenId: {}", canteenId);
+        //fetch current user and its role
+        User currentUser = userService.getCurrentLoggedInUser();
+        boolean isAdmin = currentUser.isAdmin();
+
+        if (!isAdmin) {
+            Canteen canteen = canteenRepository.findByIdAndIsDeletedFalse(canteenId).orElseThrow(
+                    () -> new ResourceNotFoundException("Canteen", "canteen id", canteenId)
+            );
+            //Core comparison: Extract the cafeteria's manager_id and compare it with the current user's ID.
+            // If the canteen has not yet been assigned a manager, access is directly denied.
+            if (canteen.getManager() == null || !canteen.getManager().getId().equals(currentUser.getId())) {
+                log.warn("IDOR Blocked: User {} attempted to access Canteen {}'s payments.", currentUser.getId(), canteenId);
+                throw new BadRequestException("Access Denied: You do not manage this canteen.");
+            }
+        }
+        Pageable pageable = createPageRequest(page, size);
+        Page<Payment> payments = paymentRepository.findByCanteenId(canteenId, pageable);
         return payments.map(paymentMapper::toDTO);
     }
 
+    //Admin can query all orders of a specific user
+    @Override
+    public Page<PaymentDTO> getPaymentsByTargetUserId(int page, int size, Long targetUserId) {
+        log.info("Admin/Manager attempting to get payments for target userId: {}", targetUserId);
+        Pageable pageable = createPageRequest(page, size);
+        Page<Payment> payments = paymentRepository.findByUserId(targetUserId, pageable);
+        return payments.map(paymentMapper::toDTO);
+    }
+
+    //User checks their own order
+    @Override
+    public Page<PaymentDTO> getPaymentsByUser(int page, int size) {
+        User user = userService.getCurrentLoggedInUser();
+        log.info("Attempting to get payments for current user: {}", user.getId());
+        Pageable pageable = createPageRequest(page, size);
+        Page<Payment> payments = paymentRepository.findByUserId(user.getId(), pageable);
+
+        return payments.map(paymentMapper::toDTO);
+    }
+
+    //Precise single order query (authorization check)
     @Override
     public PaymentDTO getPaymentByOrderId(Long orderId) {
         log.info("Attempting to get payment by orderId: {}", orderId);
         Payment payment = paymentRepository.findByOrderId(orderId).orElseThrow(
                 () -> new ResourceNotFoundException("Payment", "orderId", orderId)
         );
+        //Data Ownership Guard
+        User user = userService.getCurrentLoggedInUser();
+        boolean isAdmin = user.isAdmin();
+        boolean isOwner = payment.getUser().getId().equals(user.getId());
+
+        if (!isAdmin && !isOwner) {
+            User canteenManager = payment.getOrder().getCanteen().getManager();
+            boolean isCanteenManager = canteenManager != null && canteenManager.getId().equals(user.getId());
+            if (!isCanteenManager) {
+                log.warn("IDOR attempt blocked. User {} tried to access payment for order {}", user.getId(), orderId);
+                throw new BadRequestException("Access Denied: You do not have permission to view this payment.");
+            }
+        }
+
         return paymentMapper.toDTO(payment);
+    }
+
+    private Pageable createPageRequest(int page, int size) {
+        // Standardize parameters and sort them in descending order by ID (newest first) by default.
+        return PageRequest.of(
+                Math.max(0, page),
+                Math.max(1, Math.min(size, 100)),
+                Sort.by(Sort.Direction.DESC, "id")
+        );
     }
 }
